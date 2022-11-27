@@ -13,9 +13,9 @@ services:
   develop:
     image: dandelion000/ubuntu:develop
     volumes:
-      - "./:/root/vscode"
+      - "./:/root/cpp_learn"
     command: [ "/usr/bin/tail", "-f", "/dev/null" ]
-    working_dir: /root/vscode
+    working_dir: /root/cpp_learn
     privileged: true
     networks:
       - "test"
