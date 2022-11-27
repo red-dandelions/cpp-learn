@@ -1,0 +1,24 @@
+---
+version: '3.9'
+services:
+  develop-image:
+    image: dandelion000/ubuntu:develop
+    build: 
+      context: dockerfiles
+      dockerfile: Dockerfile
+      labels:
+        - "MAINTAINER=dandelion000"
+      network: host
+
+  develop:
+    image: dandelion000/ubuntu:develop
+    volumes:
+      - "./:/root/vscode"
+    command: [ "/usr/bin/tail", "-f", "/dev/null" ]
+    working_dir: /root/vscode
+    privileged: true
+    networks:
+      - "test"
+
+networks:
+  test: {}
