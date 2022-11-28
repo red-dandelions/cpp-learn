@@ -1,5 +1,5 @@
 build --cxxopt=-std=c++17
 build --cxxopt=-D_GLIBCXX_USE_CXX11_ABI=1
 build --cxxopt="-fPIC"
---cxxopt=-march=native
+build --cxxopt=-march=native
 build --cxxopt=-g
