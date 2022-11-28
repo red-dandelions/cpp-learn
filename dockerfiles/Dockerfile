@@ -1,11 +1,11 @@
 # 使用 ubuntu 作为基本镜像
 FROM --platform=linux/amd64 ubuntu:18.04
 
-ENV TZ=Asia/Shanghai
+ENV TZ=Asia/Shanghai LANG=C.UTF-8
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && \
     # 安装一些依赖
     apt update && \
-    apt install gdb gcc g++ git vim inetutils-ping unzip zip tcpdump wget python python3 tzdata -y && \
+    apt install clang-format gdb gcc g++ git vim inetutils-ping unzip zip tcpdump wget python tzdata -y && \
     # 安装 bazel，版本为 5.3.2
     wget https://github.com/bazelbuild/bazel/releases/download/5.3.2/bazel-5.3.2-installer-linux-x86_64.sh -O bazel-install.sh && \
     bash bazel-install.sh && \
@@ -20,3 +20,9 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone &
     tar -xf gperftools.tar.gz && \
     cd gperftools-gperftools-2.10/ && bash autogen.sh && bash configure && make && make install && cd .. && \
     rm -rf gperftools*
+
+# 安装python3.8
+RUN apt install software-properties-common -y && \
+    add-apt-repository ppa:deadsnakes/ppa && \
+    apt install python3.8 -y && rm /usr/bin/python3 && ln -sf /usr/bin/python3.8 /usr/bin/python3 && \
+    apt install python3-pip -y
