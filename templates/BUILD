@@ -6,3 +6,9 @@ cc_library(
     "@com_github_google_glog//:glog",
   ],
 )
+
+cc_library(
+  name = "macros",
+  hdrs = ["macros.h"],
+  visibility = ["//visibility:public"],
+)
