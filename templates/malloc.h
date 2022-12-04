@@ -40,19 +40,44 @@ void* mem_sbrk(size_t incr) {
 #define WSIZE               4             // 1 字 4 字节
 #define DSIZE               8             // 双字 8 字节
 #define CHUNKSIZE           1 << 12
-#define PACK(size, alloc)   ((size) | (alloc))
-#define GET(p)              (*reinterpret_cast<uint8_t*>(bp))
-#define PUT(p, val)         (*reinterpret_cast<uint32_t*>(p) = (val))
-#define GET_SIZE(p)         (GET(p) & ~0x7)
-#define GET_ALLOC(p)        (GET(p) & 0x1)
-#define HDRP(bp)            (reinterpret_cast<uint8_t*>(bp) - WSIZE)
-#define FTRP(bp)            (reinterpret_cast<uint8_t*>(bp) + GET_SIZE(HDRP(bp)) - DSIZE)
-#define NEXT_BLKP(bp)       (reinterpret_cast<uint8_t*>(bp) + GET_SIZE(reinterpret_cast<uint8_t*>(bp) - WSIZE))
-#define PREV_BLKP(bp)       (reinterpret_cast<uint8_t*>(bp) - GET_SIZE(reinterpret_cast<uint8_t*>(bp) - DSIZE))
+#define PACK(size, alloc)   ((size) | (alloc))                        // 将块大小和标志合并
+#define GET(p)              (*reinterpret_cast<uint8_t*>(bp))         // 获取 p 的值
+#define PUT(p, val)         (*reinterpret_cast<uint32_t*>(p) = (val)) // 存 val 到头部
+#define GET_SIZE(p)         (GET(p) & ~0x7)                           // 获取头部存储的块大小
+#define GET_ALLOC(p)        (GET(p) & 0x1)                            // 获取是否分配标志
+#define HDRP(bp)            (reinterpret_cast<uint8_t*>(bp) - WSIZE)                      // 头部
+#define FTRP(bp)            (reinterpret_cast<uint8_t*>(bp) + GET_SIZE(HDRP(bp)) - DSIZE) // 脚部
+#define NEXT_BLKP(bp)       (reinterpret_cast<uint8_t*>(bp) + GET_SIZE(reinterpret_cast<uint8_t*>(bp) - WSIZE)) // 后一个块
+#define PREV_BLKP(bp)       (reinterpret_cast<uint8_t*>(bp) - GET_SIZE(reinterpret_cast<uint8_t*>(bp) - DSIZE)) // 前一个块
 
-// TODO
-static void* find_fit(size_t asize);
-static void place(void* bp, size_t asize);
+static void* find_fit(size_t asize) {
+  uint8_t* bp;
+  for (bp = heap_listp; GET_SIZE(HDRP(bp)); bp = NEXT_BLKP(bp)) {
+    if (!GET_ALLOC(HDRP(bp)) && (asize <= GET_SIZE(HDRP(bp)))) {
+      // 未分配且空间足够
+      return bp;
+    }
+  }
+  return nullptr;
+}
+
+static void place(void* bp, size_t asize) {
+  size_t csize = GET_SIZE(HDRP(bp));
+
+  if ((csize - asize) >= 2 * DSIZE) {
+    // 如果分配 asize 后剩下的内存超过两个字（这里要考虑头部和脚部的开销，所以是 2 * DSIZE），则分割
+    PUT(HDRP(bp), PACK(asize, 1));          // 设置头部
+    PUT(FTRP(bp), PACK(asize, 1));          // 设置脚部
+    bp = NEXT_BLKP(bp);                     // 移动 bp 到下一个块
+    PUT(HDRP(bp), PACK(csize - asize, 0));  // 设置空闲块头部
+    PUT(FTRP(bp), PACK(csize - asize, 0));  // 设置空闲块脚部
+  } else {
+    // 不用分割
+    PUT(HDRP(bp), PACK(csize, 1));  // 设置头部
+    PUT(FTRP(bp), PACK(csize, 1));  // 设置脚部
+
+  }
+}
 
 // 合并空闲块
 static void* coalesce(void* bp) {
