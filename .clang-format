@@ -1,0 +1,16 @@
+---
+BasedOnStyle: Google
+TabWidth: 4
+# 列数
+ColumnLimit: 100
+# 连续的空行保留几行
+MaxEmptyLinesToKeep: 1
+#注释对齐
+AlignTrailingComments: true
+# 对#include进行排序，匹配了某正则表达式的#include拥有对应的优先级，匹配不到的则默认优先级为INT_MAX(优先级越小排序越靠前)，
+#   可以定义负数优先级从而保证某些#include永远在最前面
+IncludeCategories:
+  - Regex: '^<*>$'
+    Priority: 2
+  - Regex:  '^".*.h"$'
+    Priority: 1

@@ -1,20 +1,19 @@
-cc_library(
-  name = "cpp_library",
-  srcs = glob(["*.cc"]),
-  hdrs = glob(["*.h"]),
-  visibility = ["//visibility:public"],
+cc_binary(
+  name = "class_test",
+  srcs = ["class_test.cc"],
 )
 
 cc_binary(
-  name = "thread_main",
-  srcs = [
-    "thread.cc",
-  ]
+  name = "condition_variable_test",
+  srcs = ["condition_variable_test.cc"],
 )
 
 cc_binary(
-  name = "templates",
-  srcs = [
-    "templates.cc",
-  ]
+  name = "template_test",
+  srcs = ["template_test.cc"],
+)
+
+cc_binary(
+  name = "thread_test",
+  srcs = ["thread_test.cc"],
 )

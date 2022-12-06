@@ -32,3 +32,12 @@ bazel run @hedron_compile_commands//:refresh_all
 ```bash
 docker-compose up
 ```
+
+# 格式化代码
+```bash
+# 格式化所有源文件
+find ./ -iname '*.cc' -o -iname '*.cpp' -o -iname '*.c' -o '*.h' | xargs clang-format -style=file -i
+
+# 格式化单个文件
+clang-format -style=file -i {filename}
+```
