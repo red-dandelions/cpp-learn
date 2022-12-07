@@ -17,3 +17,8 @@ cc_binary(
   name = "thread_test",
   srcs = ["thread_test.cc"],
 )
+
+cc_binary(
+  name = "traits_test",
+  srcs = ["traits_test.cc"],
+)
