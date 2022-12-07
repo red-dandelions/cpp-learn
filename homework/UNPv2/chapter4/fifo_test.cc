@@ -4,13 +4,13 @@
  * int mkfifo(const char* pathname, mode_t mode);
  */
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
-#include <unistd.h>
+#include <cstring>
 #include <fcntl.h>
 #include <stdio.h>
-#include <cstring>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 #define FILE_MODE (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
 #define FIFO1 "/tmp/_parent_to_child.fifo"

@@ -10,8 +10,8 @@ namespace creational_patterns {
 class Singleton {
  public:
   friend class std::unique_ptr<Singleton>;
-  Singleton(Singleton&) = delete; // 复制构造函数禁止
-  Singleton& operator=(const Singleton&) = delete; // 赋值运算符禁止
+  Singleton(Singleton&) = delete;                   // 复制构造函数禁止
+  Singleton& operator=(const Singleton&) = delete;  // 赋值运算符禁止
 
   static Singleton* Instance() {
     if (instance_ == nullptr) {
@@ -35,7 +35,7 @@ class Singleton {
 Singleton* Singleton::instance_;
 std::mutex Singleton::mutex_;
 
-} // namespace creational_patterns
-} // namespace design_patterns
+}  // namespace creational_patterns
+}  // namespace design_patterns
 
 #endif

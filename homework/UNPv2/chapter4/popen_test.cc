@@ -1,8 +1,8 @@
 /**
  * #include <stdio.h>
- * 
+ *
  * FILE* popen(const char* command, const char* type);
- * int pclose(FILE* stream); 
+ * int pclose(FILE* stream);
  */
 
 #include <stdio.h>

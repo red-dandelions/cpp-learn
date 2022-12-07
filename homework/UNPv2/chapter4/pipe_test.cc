@@ -1,12 +1,11 @@
+#include "glog/logging.h"
+
+#include <cstdio>
+#include <cstring>
 #include <fcntl.h>
 #include <sys/errno.h>
 #include <sys/wait.h>
 #include <unistd.h>
-
-#include <cstdio>
-#include <cstring>
-
-#include "glog/logging.h"
 
 // 服务端程序
 void server(int read_fd, int write_fd) {

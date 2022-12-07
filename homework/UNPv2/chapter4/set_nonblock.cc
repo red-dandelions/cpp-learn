@@ -1,5 +1,6 @@
-#include <fcntl.h>
 #include "glog/logging.h"
+
+#include <fcntl.h>
 
 void set_nonblock(int fd) {
   int flags = fcntl(fd, F_GETFL, 0);

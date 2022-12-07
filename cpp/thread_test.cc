@@ -1,13 +1,13 @@
-#include <thread>
-#include <iostream>
 #include <chrono>
+#include <iostream>
+#include <thread>
 
 void function() {
   std::cout << "this is function, thread id: " << std::this_thread::get_id() << std::endl;
 }
 
 void add(int a, int b) {
-  std::this_thread::sleep_for(std::chrono::milliseconds(10)); // sleep 10 ms
+  std::this_thread::sleep_for(std::chrono::milliseconds(10));  // sleep 10 ms
   std::cout << "a + b = " << (a + b) << " thread id : " << std::this_thread::get_id() << std::endl;
 }
 

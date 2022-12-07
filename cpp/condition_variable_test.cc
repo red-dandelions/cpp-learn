@@ -3,8 +3,8 @@
 #include <thread>
 
 class Foo {
-public:
-  Foo () : flag_(false) {}
+ public:
+  Foo() : flag_(false) {}
   Foo(const Foo&) = delete;
 
   void Run() {
@@ -13,31 +13,27 @@ public:
     cv_.wait_for(lock, std::chrono::seconds(1));
     std::cout << "wait end. wait for flag is true, now flag: " << flag_ << std::endl;
     // 只有 flag_ 为 true 时才能被唤醒
-    cv_.wait(lock, [this]{ return this->flag_; });
+    cv_.wait(lock, [this] { return this->flag_; });
     std::cout << "now flag: " << flag_ << std::endl;
   }
 
-  void SetFlag(bool flag) {
-    flag_ = flag;
-  }
+  void SetFlag(bool flag) { flag_ = flag; }
 
   void Notify(bool flag) {
     std::cout << "try to notify Run\n";
     SetFlag(flag);
     cv_.notify_one();
   }
-  
+
   bool Flag() { return flag_; }
 
-private:
+ private:
   bool flag_;
   std::mutex mutex_;
   std::condition_variable cv_;
 };
 
-void function(Foo* a) {
-  a->Run();
-}
+void function(Foo* a) { a->Run(); }
 
 int main() {
   Foo a;

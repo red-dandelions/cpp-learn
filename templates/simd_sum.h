@@ -7,9 +7,8 @@
 
 #include <immintrin.h>
 #include <omp.h>
-#include <xmmintrin.h>
-
 #include <vector>
+#include <xmmintrin.h>
 
 namespace templates {
 namespace functor {
@@ -57,14 +56,15 @@ inline void sum_add_kernel(float* __restrict__ dst, const float* __restrict__ sr
 
 // 使用 SIMD 指令集优化
 template <int32_t kBlockSize>
-inline void sum_kernel(float* __restrict__ dst,const float* __restrict__ src) {
+inline void sum_kernel(float* __restrict__ dst, const float* __restrict__ src) {
   sum_add_kernel<kBlockSize>(dst, src);
 }  // sum_kernel
 
-inline void sum_kernel_n(const int32_t block_size, float* __restrict__ dst, const float* __restrict__ src) {
-#define CASE_BLOCK_SIZE(SIZE)         \
-  case SIZE: {                        \
-    sum_kernel<SIZE>(dst, src);       \
+inline void sum_kernel_n(const int32_t block_size, float* __restrict__ dst,
+                         const float* __restrict__ src) {
+#define CASE_BLOCK_SIZE(SIZE)   \
+  case SIZE: {                  \
+    sum_kernel<SIZE>(dst, src); \
   } break;
 
 #define CASE_BLOCK_SIZE_GROUP_4(SIZE) \
@@ -84,7 +84,7 @@ inline void sum_kernel_n(const int32_t block_size, float* __restrict__ dst, cons
 #undef CASE_BLOCK_SIZE_GROUP_4
 #undef CASE_BLOCK_SIZE
 }  // sum_kernel_n
-} // namespace
+}  // namespace
 
 template <typename T>
 struct SumImpl {
@@ -102,14 +102,15 @@ void SumImpl<T>::operator()(T* __restrict__ dst, const T* __restrict__ src, int3
 // 一个例子
 // 针对 float 类型特化
 template <>
-void SumImpl<float>::operator()(float* __restrict__ dst, const float* __restrict__ src, int32_t size) {
+void SumImpl<float>::operator()(float* __restrict__ dst, const float* __restrict__ src,
+                                int32_t size) {
   // 以 kCacheSize 为单位计算
   constexpr int32_t block_size = 16;
   for (int32_t i = 0; i < size; i += block_size) {
     sum_kernel_n(block_size, dst, src);
   }
 }
-} // namespace functor
+}  // namespace functor
 
 template <typename T>
 void Sum(std::vector<T>& dst, const std::vector<T>& src) {
@@ -118,6 +119,6 @@ void Sum(std::vector<T>& dst, const std::vector<T>& src) {
   functor::SumImpl<T>()(dst.data(), src.data(), src.size());
 }
 
-} // namespace templates
+}  // namespace templates
 
 #endif

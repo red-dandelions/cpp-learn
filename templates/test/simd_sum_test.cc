@@ -1,6 +1,7 @@
 #include "templates/simd_sum.h"
 
 #include "gtest/gtest.h"
+
 #include <iostream>
 #include <vector>
 
