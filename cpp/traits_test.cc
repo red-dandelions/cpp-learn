@@ -53,6 +53,18 @@ void init_test(std::initializer_list<int> args) {
   std::cout << std::endl;
 }
 
+enum class 八卦 : int64_t {
+  坎,  // 北
+  坤,  // 西南
+  震,  // 东
+  巽,  // 东南
+  中,
+  乾,  // 西北
+  兑,  // 西
+  艮,  // 东北
+  离   // 南
+};
+
 int main() {
   function(1, 1);
   function<std::string, int>("test", 2);
@@ -68,6 +80,9 @@ int main() {
   Bar(1, 2, "3", "four");
 
   init_test({9, 8, 7, 1, 2, 3});
+
+  八卦 a = 八卦::乾;
+  std::cout << "乾: " << int64_t(a) << std::endl;
 
   return 0;
 }
