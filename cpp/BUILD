@@ -4,6 +4,11 @@ cc_binary(
 )
 
 cc_binary(
+  name = "class_inheritance_test",
+  srcs = ["class_inheritance_test.cc"],
+)
+
+cc_binary(
   name = "condition_variable_test",
   srcs = ["condition_variable_test.cc"],
 )
