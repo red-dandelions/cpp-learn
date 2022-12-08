@@ -1,20 +1,24 @@
-#include <iostream>
+#include <cstdio>
 #include <typeinfo>
 
 class BaseNormal {
  public:
   void print(uint8_t* p) {
-    uint8_t* start_address = p; // 记录 Base 类起始地址
-    std::cout << "BaseNormal has no virtual functions.\n\n";
-    std::cout << "BaseNormal size: " << sizeof(BaseNormal) << std::endl;
-    std::cout << "BaseNormal start address: " << reinterpret_cast<void*>(start_address) << std::endl << std::endl;
+    uint8_t* start_address = p;  // 记录 Base 类起始地址
+    printf("BaseNormal has no virtual functions.\n\n");
+    printf("BaseNormal size: %ld\n", sizeof(BaseNormal));
+    printf("BaseNormal start address: %p\n\n", reinterpret_cast<void*>(start_address));
 
-    std::cout << "BaseNormal data menber: \n";
-    std::cout << "  address: " << reinterpret_cast<void*>(p) << " offset: " << p - start_address << " bytes.   value1: " << *reinterpret_cast<char*>(p) << std::endl;
+    // print data member
+    printf("BaseNormal data menber: \n");
+    printf("  address: %p offset: %2d bytes. value1: %c\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<char*>(p));
     p += 4;
-    std::cout << "  address: " << reinterpret_cast<void*>(p) << " offset: " << p - start_address << " bytes.   value2: " << *reinterpret_cast<int*>(p) << std::endl;
+    printf("  address: %p offset: %2d bytes. value2: %d\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<int*>(p));
     p += 4;
-    std::cout << "  address: " << reinterpret_cast<void*>(p) << " offset: " << p - start_address << " bytes.   value3: " << *reinterpret_cast<int64_t*>(p) << std::endl;
+    printf("  address: %p offset: %2d bytes. value3: %lld\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<int64_t*>(p));
   }
 
  private:
@@ -25,27 +29,37 @@ class BaseNormal {
 
 class Base {
  public:
-  typedef void(*function)();
+  virtual void a() { printf("  Base::a()\n"); }
+
+  virtual void b() { printf("  Base::b()\n"); }
+
+  typedef void (*function)();
   void print(uint8_t* p) {
-    uint8_t* start = p;
-    std::cout << "Base has virtual functions.\n\n";
-    std::cout << "Base size: " << sizeof(Base) << std::endl;
-    std::cout << "Base start address: " << reinterpret_cast<void*>(start) << std::endl << std::endl;
+    uint8_t* start_address = p;  // 记录 Base 类起始地址
+    printf("Base has virtual functions.\n\n");
+    printf("Base size: %ld\n", sizeof(Base));
+    printf("Base start address: %p\n\n", reinterpret_cast<void*>(start_address));
 
-    std::cout << "Base data menber: \n";
-    std::cout << "  address: " << reinterpret_cast<void*>(p) << "   vptr: " << reinterpret_cast<void*>(*reinterpret_cast<int64_t*>(p)) << std::endl;
+    printf("Base data menber: \n");
+    printf("  address: %p offset: %2d bytes.   vptr: %p\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), reinterpret_cast<void*>(p));
     p += 8;
-    std::cout << "  address: " << reinterpret_cast<void*>(p) << "   value1: " << *reinterpret_cast<char*>(p) << std::endl;
+    printf("  address: %p offset: %2d bytes. value1: %c\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<char*>(p));
     p += 4;
-    std::cout << "  address: " << reinterpret_cast<void*>(p) << "   value2: " << *reinterpret_cast<int*>(p) << std::endl;
+    printf("  address: %p offset: %2d bytes. value2: %d\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<int*>(p));
     p += 4;
-    std::cout << "  address: " << reinterpret_cast<void*>(p) << "   value3: " << *reinterpret_cast<int64_t*>(p) << std::endl;
-
-    std::cout << std::endl;
+    printf("  address: %p offset: %2d bytes. value3: %lld\n\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<int64_t*>(p));
 
     // 虚函数表保存的为函数指针
-    uint8_t* vtable_start = reinterpret_cast<uint8_t*>(*reinterpret_cast<int64_t*>(start));
-    std::cout << "vtable start address: " << reinterpret_cast<void*>(vtable_start) << std::endl;
+    uint8_t* vtable_start = reinterpret_cast<uint8_t*>(*reinterpret_cast<int64_t*>(start_address));
+
+    auto info = reinterpret_cast<std::type_info*>(*reinterpret_cast<int64_t*>(vtable_start - 8));
+    printf("vtable start address: %p  | type: %s  | offset: %2lld bytes.\n",
+           reinterpret_cast<void*>(vtable_start), info->name(),
+           *reinterpret_cast<int64_t*>(vtable_start - 16));
 
     // 获得函数指针: auto fptr_value =  *reinterpret_cast<int64_t*>(vtable_ptr);
     // 转换为对应函数: auto fp = reinterpret_cast<function>(fptr_value);
@@ -53,32 +67,15 @@ class Base {
     uint8_t* vtable_ptr = vtable_start;
 
     auto fp = reinterpret_cast<function>(*reinterpret_cast<int64_t*>(vtable_ptr));
-    std::cout << "  function a() address: " << reinterpret_cast<void*>(vtable_ptr) << " offset: " << vtable_ptr - vtable_start << " bytes.  a(): ";
+    printf("  function a() address: %p  offset: %2d bytes. a(): ",
+           reinterpret_cast<void*>(vtable_ptr), static_cast<int>(vtable_ptr - vtable_start));
     fp();
 
     vtable_ptr += 8;
     fp = reinterpret_cast<function>(*reinterpret_cast<int64_t*>(vtable_ptr));
-    std::cout << "  function b() address: " << reinterpret_cast<void*>(vtable_ptr) << " offset: " << vtable_ptr - vtable_start << " bytes.  b(): ";
+    printf("  function a() address: %p  offset: %2d bytes. b(): ",
+           reinterpret_cast<void*>(vtable_ptr), static_cast<int>(vtable_ptr - vtable_start));
     fp();
-
-    // typeinfo
-    vtable_ptr = vtable_start - 8;
-    auto info = reinterpret_cast<std::type_info*>(*reinterpret_cast<int64_t*>(vtable_ptr));
-    std::cout << " type: " << info->name() << std::endl;
-
-    // 函数指针对于类的起始位置偏移量
-    vtable_ptr = vtable_start - 16;
-    std::cout << "  vptr offset: " << *reinterpret_cast<int64_t*>(vtable_ptr) << std::endl;
-
-    std::cout << "\n";
-  }
-
-  virtual void a() {
-    std::cout << "  Base::a()\n";
-  }
-
-  virtual void b() {
-    std::cout << "  Base::b()\n";
   }
 
  private:
@@ -87,22 +84,466 @@ class Base {
   int64_t value3 = 2048;
 };
 
-class SingleDeriver : public BaseNormal {
+class SingleDeriver : public Base {
+ public:
+  void print(uint8_t* p) {
+    uint8_t* start_address = p;
+    printf("SingleDeriver has no virtual functions.\n\n");
+    printf("SingleDeriver size: %ld\n", sizeof(SingleDeriver));
+    printf("SingleDeriver start address: %p\n\n", reinterpret_cast<void*>(start_address));
 
+    printf("SingleDeriver data menber: \n");
+    printf("  address: %p offset: %2d bytes.   vptr: %p\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), reinterpret_cast<void*>(p));
+    p += 8;
+    printf("  address: %p offset: %2d bytes. value1: %c\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<char*>(p));
+    p += 4;
+    printf("  address: %p offset: %2d bytes. value2: %d\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<int*>(p));
+    p += 4;
+    printf("  address: %p offset: %2d bytes. value3: %lld\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<int64_t*>(p));
+    p += 8;
+    printf("  address: %p offset: %2d bytes. value4: %d\n\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<int*>(p));
+
+    // 虚函数表保存的为函数指针
+    uint8_t* vtable_start = reinterpret_cast<uint8_t*>(*reinterpret_cast<int64_t*>(start_address));
+
+    auto info = reinterpret_cast<std::type_info*>(*reinterpret_cast<int64_t*>(vtable_start - 8));
+    printf("vtable start address: %p  | type: %s  | offset: %2lld bytes.\n",
+           reinterpret_cast<void*>(vtable_start), info->name(),
+           *reinterpret_cast<int64_t*>(vtable_start - 16));
+
+    // 获得函数指针: auto fptr_value =  *reinterpret_cast<int64_t*>(vtable_ptr);
+    // 转换为对应函数: auto fp = reinterpret_cast<function>(fptr_value);
+    // 调用 fp();
+
+    uint8_t* vtable_ptr = vtable_start;
+
+    auto fp = reinterpret_cast<function>(*reinterpret_cast<int64_t*>(vtable_ptr));
+    printf("  function a() address: %p  offset: %2d bytes. a(): ",
+           reinterpret_cast<void*>(vtable_ptr), static_cast<int>(vtable_ptr - vtable_start));
+    fp();
+
+    vtable_ptr += 8;
+    fp = reinterpret_cast<function>(*reinterpret_cast<int64_t*>(vtable_ptr));
+    printf("  function b() address: %p  offset: %2d bytes. b(): ",
+           reinterpret_cast<void*>(vtable_ptr), static_cast<int>(vtable_ptr - vtable_start));
+    fp();
+
+    vtable_ptr += 8;
+    fp = reinterpret_cast<function>(*reinterpret_cast<int64_t*>(vtable_ptr));
+    printf("  function c() address: %p  offset: %2d bytes. c(): ",
+           reinterpret_cast<void*>(vtable_ptr), static_cast<int>(vtable_ptr - vtable_start));
+    fp();
+  }
+
+  virtual void a() override { printf("  SingleDeriver::a()\n"); }
+
+  virtual void c() { printf("  SingleDeriver::c()\n"); }
+
+ private:
+  int value4 = 512;
+};
+
+class Foo {
+ public:
+  virtual void c() { printf("  Foo::c()\n"); }
+
+  virtual void d() { printf("  Foo::d()\n"); }
+
+ private:
+  char value4 = 'b';
+  int64_t value5 = 128;
+};
+
+class MultiDeriver : public Base, public Foo {
+ public:
+  virtual void a() override { printf("  MultiDeriver::a()\n"); }
+
+  virtual void d() override { printf("  MultiDeriver::d()\n"); }
+
+  virtual void e() { printf("  MultiDeriver::e()\n"); }
+
+  typedef void (*function)();
+  void print(uint8_t* p) {
+    uint8_t* start_address = p;  // 记录 Base 类起始地址
+    size_t vptr2_offset;
+    printf("MultiDeriver has virtual functions.\n\n");
+    printf("MultiDeriver size: %ld\n", sizeof(MultiDeriver));
+    printf("MultiDeriver start address: %p\n\n", reinterpret_cast<void*>(start_address));
+
+    printf("MultiDeriver data menber: \n");
+    printf("  address: %p offset: %2d bytes.  vptr1: %p\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), reinterpret_cast<void*>(p));
+    p += 8;
+    printf("  address: %p offset: %2d bytes. value1: %c\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<char*>(p));
+    p += 4;
+    printf("  address: %p offset: %2d bytes. value2: %d\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<int*>(p));
+    p += 4;
+    printf("  address: %p offset: %2d bytes. value3: %lld\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<int64_t*>(p));
+    p += 8;
+    vptr2_offset = p - start_address;
+    printf("  address: %p offset: %2d bytes.  vptr2: %p\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), reinterpret_cast<void*>(p));
+    p += 8;
+    printf("  address: %p offset: %2d bytes. value4: %c\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<char*>(p));
+    p += 8;
+    printf("  address: %p offset: %2d bytes. value5: %lld\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<int64_t*>(p));
+    p += 8;
+    printf("  address: %p offset: %2d bytes. value6: %c\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<char*>(p));
+    p += 2;
+    printf("  address: %p offset: %2d bytes. value7: %d\n\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<short*>(p));
+
+    // 虚函数表保存的为函数指针
+    uint8_t* vtable_start = reinterpret_cast<uint8_t*>(*reinterpret_cast<int64_t*>(start_address));
+
+    auto info = reinterpret_cast<std::type_info*>(*reinterpret_cast<int64_t*>(vtable_start - 8));
+    printf("MultiDeriver vtable start address: %p  | type: %s  | offset: %2lld bytes.\n",
+           reinterpret_cast<void*>(vtable_start), info->name(),
+           *reinterpret_cast<int64_t*>(vtable_start - 16));
+
+    // 获得函数指针: auto fptr_value =  *reinterpret_cast<int64_t*>(vtable_ptr);
+    // 转换为对应函数: auto fp = reinterpret_cast<function>(fptr_value);
+    // 调用 fp();
+    uint8_t* vtable_ptr = vtable_start;
+    // Base & MultiDeriver vtable
+    auto fp = reinterpret_cast<function>(*reinterpret_cast<int64_t*>(vtable_ptr));
+    printf("  function a() address: %p  offset: %2d bytes. a(): ",
+           reinterpret_cast<void*>(vtable_ptr), static_cast<int>(vtable_ptr - vtable_start));
+    fp();
+    vtable_ptr += 8;
+    fp = reinterpret_cast<function>(*reinterpret_cast<int64_t*>(vtable_ptr));
+    printf("  function b() address: %p  offset: %2d bytes. b(): ",
+           reinterpret_cast<void*>(vtable_ptr), static_cast<int>(vtable_ptr - vtable_start));
+    fp();
+    vtable_ptr += 8;
+    fp = reinterpret_cast<function>(*reinterpret_cast<int64_t*>(vtable_ptr));
+    printf("  function d() address: %p  offset: %2d bytes. d(): ",
+           reinterpret_cast<void*>(vtable_ptr), static_cast<int>(vtable_ptr - vtable_start));
+    fp();
+    vtable_ptr += 8;
+    fp = reinterpret_cast<function>(*reinterpret_cast<int64_t*>(vtable_ptr));
+    printf("  function e() address: %p  offset: %2d bytes. e(): ",
+           reinterpret_cast<void*>(vtable_ptr), static_cast<int>(vtable_ptr - vtable_start));
+    fp();
+
+    // Foo & MultiDeriver vtable
+    vtable_start =
+        reinterpret_cast<uint8_t*>(*reinterpret_cast<int64_t*>(start_address + vptr2_offset));
+
+    info = reinterpret_cast<std::type_info*>(*reinterpret_cast<int64_t*>(vtable_start - 8));
+    printf("vtable start address: %p  | type: %s  | offset: %2lld bytes.\n",
+           reinterpret_cast<void*>(vtable_start), info->name(),
+           *reinterpret_cast<int64_t*>(vtable_start - 16));
+    vtable_ptr = vtable_start;
+    fp = reinterpret_cast<function>(*reinterpret_cast<int64_t*>(vtable_ptr));
+    printf("  function c() address: %p  offset: %2d bytes. c(): ",
+           reinterpret_cast<void*>(vtable_ptr), static_cast<int>(vtable_ptr - vtable_start));
+    fp();
+
+    vtable_ptr += 8;
+    fp = reinterpret_cast<function>(*reinterpret_cast<int64_t*>(vtable_ptr));
+    printf("  function d() address: %p  offset: %2d bytes. d(): ",
+           reinterpret_cast<void*>(vtable_ptr), static_cast<int>(vtable_ptr - vtable_start));
+    fp();
+  }
+
+ private:
+  char value6 = 'c';
+  short value7 = 64;
+};
+
+class Bar : Base {
+ public:
+  virtual void d() { printf("  Bar::d()\n"); }
+
+ private:
+  int64_t value5 = 128;
+};
+
+class DiamondDeriver : public SingleDeriver, public Bar {
+ public:
+  virtual void e() { printf("  DiamondDeriver::e()\n"); }
+
+  typedef void (*function)();
+  void print(uint8_t* p) {
+    uint8_t* start_address = p;  // 记录 Base 类起始地址
+    size_t vptr2_offset;
+    printf("DiamondDeriver has virtual functions.\n\n");
+    printf("DiamondDeriver size: %ld\n", sizeof(DiamondDeriver));
+    printf("DiamondDeriver start address: %p\n\n", reinterpret_cast<void*>(start_address));
+
+    printf("DiamondDeriver data menber: \n");
+    printf("  address: %p offset: %2d bytes.  vptr1: %p\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), reinterpret_cast<void*>(p));
+    p += 8;
+    printf("  address: %p offset: %2d bytes. value1: %c\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<char*>(p));
+    p += 4;
+    printf("  address: %p offset: %2d bytes. value2: %d\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<int*>(p));
+    p += 4;
+    printf("  address: %p offset: %2d bytes. value3: %lld\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<int64_t*>(p));
+    p += 8;
+    printf("  address: %p offset: %2d bytes. value4: %d\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<int*>(p));
+    p += 8;
+    vptr2_offset = p - start_address;
+    printf("  address: %p offset: %2d bytes.  vptr2: %p\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), reinterpret_cast<void*>(p));
+    p += 8;
+    printf("  address: %p offset: %2d bytes. value1: %c\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<char*>(p));
+    p += 4;
+    printf("  address: %p offset: %2d bytes. value2: %d\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<int*>(p));
+    p += 4;
+    printf("  address: %p offset: %2d bytes. value3: %lld\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<int64_t*>(p));
+    p += 8;
+    printf("  address: %p offset: %2d bytes. value5: %lld\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<int64_t*>(p));
+    p += 8;
+    printf("  address: %p offset: %2d bytes. value6: %c\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<char*>(p));
+    p += 2;
+    printf("  address: %p offset: %2d bytes. value7: %d\n\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<short*>(p));
+
+    // 虚函数表保存的为函数指针
+    uint8_t* vtable_start = reinterpret_cast<uint8_t*>(*reinterpret_cast<int64_t*>(start_address));
+
+    auto info = reinterpret_cast<std::type_info*>(*reinterpret_cast<int64_t*>(vtable_start - 8));
+    printf("DiamondDeriver vtable start address: %p  | type: %s  | offset: %2lld bytes.\n",
+           reinterpret_cast<void*>(vtable_start), info->name(),
+           *reinterpret_cast<int64_t*>(vtable_start - 16));
+
+    // 获得函数指针: auto fptr_value =  *reinterpret_cast<int64_t*>(vtable_ptr);
+    // 转换为对应函数: auto fp = reinterpret_cast<function>(fptr_value);
+    // 调用 fp();
+    uint8_t* vtable_ptr = vtable_start;
+    // SingleDeriver & DiamondDeriver vtable
+    auto fp = reinterpret_cast<function>(*reinterpret_cast<int64_t*>(vtable_ptr));
+    printf("  function a() address: %p  offset: %2d bytes. a(): ",
+           reinterpret_cast<void*>(vtable_ptr), static_cast<int>(vtable_ptr - vtable_start));
+    fp();
+    vtable_ptr += 8;
+    fp = reinterpret_cast<function>(*reinterpret_cast<int64_t*>(vtable_ptr));
+    printf("  function b() address: %p  offset: %2d bytes. b(): ",
+           reinterpret_cast<void*>(vtable_ptr), static_cast<int>(vtable_ptr - vtable_start));
+    fp();
+    vtable_ptr += 8;
+    fp = reinterpret_cast<function>(*reinterpret_cast<int64_t*>(vtable_ptr));
+    printf("  function c() address: %p  offset: %2d bytes. c(): ",
+           reinterpret_cast<void*>(vtable_ptr), static_cast<int>(vtable_ptr - vtable_start));
+    fp();
+    vtable_ptr += 8;
+    fp = reinterpret_cast<function>(*reinterpret_cast<int64_t*>(vtable_ptr));
+    printf("  function e() address: %p  offset: %2d bytes. e(): ",
+           reinterpret_cast<void*>(vtable_ptr), static_cast<int>(vtable_ptr - vtable_start));
+    fp();
+
+    // Bar & DiamondDeriver vtable
+    vtable_start =
+        reinterpret_cast<uint8_t*>(*reinterpret_cast<int64_t*>(start_address + vptr2_offset));
+
+    info = reinterpret_cast<std::type_info*>(*reinterpret_cast<int64_t*>(vtable_start - 8));
+    printf("vtable start address: %p  | type: %s  | offset: %2lld bytes.\n",
+           reinterpret_cast<void*>(vtable_start), info->name(),
+           *reinterpret_cast<int64_t*>(vtable_start - 16));
+    vtable_ptr = vtable_start;
+    fp = reinterpret_cast<function>(*reinterpret_cast<int64_t*>(vtable_ptr));
+    printf("  function a() address: %p  offset: %2d bytes. a(): ",
+           reinterpret_cast<void*>(vtable_ptr), static_cast<int>(vtable_ptr - vtable_start));
+    fp();
+    vtable_ptr += 8;
+    fp = reinterpret_cast<function>(*reinterpret_cast<int64_t*>(vtable_ptr));
+    printf("  function b() address: %p  offset: %2d bytes. b(): ",
+           reinterpret_cast<void*>(vtable_ptr), static_cast<int>(vtable_ptr - vtable_start));
+    fp();
+    vtable_ptr += 8;
+    fp = reinterpret_cast<function>(*reinterpret_cast<int64_t*>(vtable_ptr));
+    printf("  function d() address: %p  offset: %2d bytes. d(): ",
+           reinterpret_cast<void*>(vtable_ptr), static_cast<int>(vtable_ptr - vtable_start));
+    fp();
+  }
+
+ private:
+  char value6 = 'd';
+  short value7 = 32;
+};
+
+class SingleDeriverVirtual : public virtual Base {
+ public:
+  virtual void c() { printf("  SingleDeriverVirtual::c()\n"); }
+
+ private:
+  int value4 = 512;
+};
+
+class BarVirtual : public virtual Base {
+ public:
+  virtual void a() override { printf("  BarVirtual::a()\n"); }
+
+  virtual void d() { printf("  BarVirtual::d()\n"); }
+
+ private:
+  int value5 = 258;
+};
+
+class DiamondDeriverVirtual : public SingleDeriverVirtual, public BarVirtual {
+ public:
+  virtual void e() { printf("  DiamondDeriverVirtual::e()\n"); }
+
+  typedef void (*function)();
+  void print(uint8_t* p) {
+    uint8_t* start_address = p;  // 记录 Base 类起始地址
+    size_t vptr2_offset, vptr3_offset;
+    printf("DiamondDeriverVirtual has virtual functions.\n\n");
+    printf("DiamondDeriverVirtual size: %ld\n", sizeof(DiamondDeriverVirtual));
+    printf("DiamondDeriverVirtual start address: %p\n\n", reinterpret_cast<void*>(start_address));
+
+    printf("DiamondDeriverVirtual data menber: \n");
+    printf("  address: %p offset: %2d bytes.  vptr1: %p\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), reinterpret_cast<void*>(p));
+    p += 8;
+    printf("  address: %p offset: %2d bytes. value4: %d\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<int*>(p));
+    p += 8;
+    vptr2_offset = p - start_address;
+    printf("  address: %p offset: %2d bytes.  vptr2: %p\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), reinterpret_cast<void*>(p));
+    p += 8;
+    printf("  address: %p offset: %2d bytes. value5: %d\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<int*>(p));
+    p += 4;
+    printf("  address: %p offset: %2d bytes. value6: %c\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<char*>(p));
+    p += 2;
+    printf("  address: %p offset: %2d bytes. value7: %d\n\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<short*>(p));
+    p += 2;
+    vptr3_offset = p - start_address;
+    printf("  address: %p offset: %2d bytes.  vptr3: %p\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), reinterpret_cast<void*>(p));
+    p += 8;
+    // Base
+    printf("  address: %p offset: %2d bytes. value1: %c\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<char*>(p));
+    p += 4;
+    printf("  address: %p offset: %2d bytes. value2: %d\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<int*>(p));
+    p += 4;
+    printf("  address: %p offset: %2d bytes. value3: %lld\n\n", reinterpret_cast<void*>(p),
+           static_cast<int>(p - start_address), *reinterpret_cast<int64_t*>(p));
+
+    // 虚函数表保存的为函数指针
+    uint8_t* vtable_start = reinterpret_cast<uint8_t*>(*reinterpret_cast<int64_t*>(start_address));
+
+    auto info = reinterpret_cast<std::type_info*>(*reinterpret_cast<int64_t*>(vtable_start - 8));
+    printf("DiamondDeriverVirtual vtable start address: %p  | type: %s  | offset: %2lld bytes.\n",
+           reinterpret_cast<void*>(vtable_start), info->name(),
+           *reinterpret_cast<int64_t*>(vtable_start - 16));
+
+    // 获得函数指针: auto fptr_value =  *reinterpret_cast<int64_t*>(vtable_ptr);
+    // 转换为对应函数: auto fp = reinterpret_cast<function>(fptr_value);
+    // 调用 fp();
+    uint8_t* vtable_ptr = vtable_start;
+    // SingleDeriverVirtual & DiamondDeriverVirtual vtable
+    auto fp = reinterpret_cast<function>(*reinterpret_cast<int64_t*>(vtable_ptr));
+    printf("  function c() address: %p  offset: %2d bytes. c(): ",
+           reinterpret_cast<void*>(vtable_ptr), static_cast<int>(vtable_ptr - vtable_start));
+    fp();
+    vtable_ptr += 8;
+    fp = reinterpret_cast<function>(*reinterpret_cast<int64_t*>(vtable_ptr));
+    printf("  function e() address: %p  offset: %2d bytes. e(): ",
+           reinterpret_cast<void*>(vtable_ptr), static_cast<int>(vtable_ptr - vtable_start));
+    fp();
+
+    // BarVirtual vtable
+    vtable_start =
+        reinterpret_cast<uint8_t*>(*reinterpret_cast<int64_t*>(start_address + vptr2_offset));
+
+    info = reinterpret_cast<std::type_info*>(*reinterpret_cast<int64_t*>(vtable_start - 8));
+    printf("\nBarVirtual vtable start address: %p  | type: %s  | offset: %2lld bytes.\n",
+           reinterpret_cast<void*>(vtable_start), info->name(),
+           *reinterpret_cast<int64_t*>(vtable_start - 16));
+    vtable_ptr = vtable_start;
+    fp = reinterpret_cast<function>(*reinterpret_cast<int64_t*>(vtable_ptr));
+    printf("  function a() address: %p  offset: %2d bytes. a(): ",
+           reinterpret_cast<void*>(vtable_ptr), static_cast<int>(vtable_ptr - vtable_start));
+    fp();
+    vtable_ptr += 8;
+    fp = reinterpret_cast<function>(*reinterpret_cast<int64_t*>(vtable_ptr));
+    printf("  function d() address: %p  offset: %2d bytes. d(): ",
+           reinterpret_cast<void*>(vtable_ptr), static_cast<int>(vtable_ptr - vtable_start));
+    fp();
+
+    // Base vtable
+    vtable_start =
+        reinterpret_cast<uint8_t*>(*reinterpret_cast<int64_t*>(start_address + vptr3_offset));
+    info = reinterpret_cast<std::type_info*>(*reinterpret_cast<int64_t*>(vtable_start - 8));
+    printf("\nBase vtable start address: %p  | type: %s  | offset: %2lld bytes.\n",
+           reinterpret_cast<void*>(vtable_start), info->name(),
+           *reinterpret_cast<int64_t*>(vtable_start - 16));
+    vtable_ptr = vtable_start;
+    // 这里是因为在 Base 的虚函数表中，a 被 BarVirtual 类重写了，所以在 Base 类的虚函数表中没有
+    // a()，访问就是错误的. b() 的偏移量为8字节，偏移量对应 Base 类的虚函数表。 如果 b() 在 a()
+    // 前面，则不用加偏移量，b() 就在虚函数表的表头。
+    vtable_ptr += 8;
+    printf("%p", reinterpret_cast<void*>(vtable_ptr));
+    fp = reinterpret_cast<function>(*reinterpret_cast<int64_t*>(vtable_ptr));
+    printf("  function b() address: %p  offset: %2d bytes. b(): ",
+           reinterpret_cast<void*>(vtable_ptr), static_cast<int>(vtable_ptr - vtable_start));
+    fp();
+  }
+
+ private:
+  char value6 = 'd';
+  short value7 = 32;
 };
 
 int main() {
-  std::cout << "-----------------------------------------------------------------------------\n";
+  printf("-----------------------------------------------------------------------------\n");
   BaseNormal base_normal;
   base_normal.print(reinterpret_cast<uint8_t*>(&base_normal));
-  std::cout << "-----------------------------------------------------------------------------\n\n";
+  printf("-----------------------------------------------------------------------------\n\n");
 
-  std::cout << "-----------------------------------------------------------------------------\n";
+  printf("-----------------------------------------------------------------------------\n");
   Base base;
   base.print(reinterpret_cast<uint8_t*>(&base));
-  std::cout << "-----------------------------------------------------------------------------\n\n";
+  printf("-----------------------------------------------------------------------------\n\n");
 
-  std::cout << typeid(SingleDeriver).name() << std::endl;
+  printf("-----------------------------------------------------------------------------\n");
+  SingleDeriver single_deriver;
+  single_deriver.print(reinterpret_cast<uint8_t*>(&single_deriver));
+  printf("-----------------------------------------------------------------------------\n\n");
+
+  printf("-----------------------------------------------------------------------------\n");
+  MultiDeriver multi_deriver;
+  multi_deriver.print(reinterpret_cast<uint8_t*>(&multi_deriver));
+  printf("-----------------------------------------------------------------------------\n\n");
+
+  printf("-----------------------------------------------------------------------------\n");
+  DiamondDeriver diamond_deriver;
+  diamond_deriver.print(reinterpret_cast<uint8_t*>(&diamond_deriver));
+  printf("-----------------------------------------------------------------------------\n\n");
+
+  printf("-----------------------------------------------------------------------------\n");
+  DiamondDeriverVirtual diamond_deriver_virtual;
+  diamond_deriver_virtual.print(reinterpret_cast<uint8_t*>(&diamond_deriver_virtual));
+  printf("-----------------------------------------------------------------------------\n\n");
 
   return 0;
 }
