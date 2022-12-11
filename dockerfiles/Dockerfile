@@ -5,7 +5,7 @@ ENV TZ=Asia/Shanghai LANG=C.UTF-8
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && \
     # 安装一些依赖
     apt update && \
-    apt install clang-format gdb gcc g++ git vim inetutils-ping unzip zip tcpdump wget python tzdata -y && \
+    apt install clang-format gdb gcc g++ git vim inetutils-ping unzip zip tcpdump wget python tzdata gcc-multilib -y && \
     # 安装 bazel，版本为 5.3.2
     wget https://github.com/bazelbuild/bazel/releases/download/5.3.2/bazel-5.3.2-installer-linux-x86_64.sh -O bazel-install.sh && \
     bash bazel-install.sh && \

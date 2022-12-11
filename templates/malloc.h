@@ -8,6 +8,7 @@
 namespace templates {
 
 /**
+ * TODO: fix bug
  * [mem_heap, mem_brk] 为已分配内存
  * mem_brk 之后为未分配内存
  * mem_sbrk 分配堆内存，不能收缩
@@ -42,7 +43,7 @@ void* mem_sbrk(size_t incr) {
 #define DSIZE 8  // 双字 8 字节
 #define CHUNKSIZE 1 << 12
 #define PACK(size, alloc) ((size) | (alloc))                   // 将块大小和标志合并
-#define GET(p) (*reinterpret_cast<uint8_t*>(bp))               // 获取 p 的值
+#define GET(p) (*reinterpret_cast<uint64_t*>(bp))               // 获取 p 的值
 #define PUT(p, val) (*reinterpret_cast<uint32_t*>(p) = (val))  // 存 val 到头部
 #define GET_SIZE(p) (GET(p) & ~0x7)                            // 获取头部存储的块大小
 #define GET_ALLOC(p) (GET(p) & 0x1)                            // 获取是否分配标志
@@ -55,7 +56,7 @@ void* mem_sbrk(size_t incr) {
 
 static void* find_fit(size_t asize) {
   uint8_t* bp;
-  for (bp = heap_listp; GET_SIZE(HDRP(bp)); bp = NEXT_BLKP(bp)) {
+  for (bp = heap_listp; GET_SIZE(HDRP(bp)) > 0; bp = NEXT_BLKP(bp)) {
     if (!GET_ALLOC(HDRP(bp)) && (asize <= GET_SIZE(HDRP(bp)))) {
       // 未分配且空间足够
       return bp;
