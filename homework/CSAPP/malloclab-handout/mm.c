@@ -230,13 +230,15 @@ void* mm_realloc(void* p, size_t size) {
   }
 
   if (old_size > new_size) {
-      return place(p, new_size);
+      place(p, new_size);
+      return p;
   }
   void* new_p = find_fit_block(new_size);
   if (new_p != NULL) {
       place(new_p, new_size);
       memcpy(new_p, p, data_size);
-      return p;
+      mm_free(p);
+      return new_p;
   }
   if (total_free_size > new_size) {
     coalesces();
@@ -245,7 +247,8 @@ void* mm_realloc(void* p, size_t size) {
   if (new_p != NULL) {
       place(new_p, new_size);
       memcpy(new_p, p, data_size);
-      return p;
+      mm_free(p);
+      return new_p;
   }
 
   new_p = mem_sbrk(new_size);
