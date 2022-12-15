@@ -17,8 +17,7 @@ services:
     command: [ "/usr/bin/tail", "-f", "/dev/null" ]
     working_dir: /root/cpp_learn
     privileged: true
-    networks:
-      - "test"
+    network: host
 
 networks:
   test: {}
