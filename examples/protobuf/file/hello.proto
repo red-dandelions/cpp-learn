@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package vscode.examples.protobuf;
+
+message Hello {
+  string name = 1;
+};

@@ -9,13 +9,12 @@
 #)
 
 cc_library(
-  name = "macros",
-  hdrs = ["macros.h"],
-  visibility = ["//visibility:public"],
-)
-
-cc_library(
-  name = "timer",
-  hdrs = ["timer.h"],
+  name = "examples",
+  srcs = glob(["*.cc"]),
+  hdrs = glob(["*.h"]),
+  deps = [
+    "//cpp/datastructure/hash:hash",
+    "@com_github_google_glog//:glog",
+  ],
   visibility = ["//visibility:public"],
 )

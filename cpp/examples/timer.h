@@ -1,9 +1,8 @@
-#ifndef __TEMPLATES_TIMER_H__
-#define __TEMPLATES_TIMER_H__
+#pragma once
 
 #include <chrono>
 
-namespace templates {
+namespace examples {
 class Timer {
  private:
   typedef std::chrono::steady_clock clock;
@@ -35,6 +34,4 @@ class Timer {
   std::chrono::time_point<clock> start_;
 };
 
-}  // namespace templates
-
-#endif
+}  // namespace examples

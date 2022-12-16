@@ -1,5 +1,5 @@
-#ifndef __TEMPLATES_MACROS_H__
-#define __TEMPLATES_MACROS_H__
+#pragma once
+
 #include <bitset>
 #include <iostream>
 
@@ -20,5 +20,3 @@
 #ifndef unlikely
 #define unlikely(x) __builtin_expect(!!(x), 0)
 #endif
-
-#endif  // __TEMPLATES_MACROS_H__

@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package vscode.examples.grpc;
+
+service HelloService {
+  rpc function(Request) returns (Response);
+};
+
+message Request {
+  string context = 1;
+};
+
+message Response {
+  string result = 1;
+};

@@ -1,7 +1,6 @@
 // intel 指令集文档：https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html
 // 使用 C++ 模板 + SIMD 优化运算
-#ifndef __TEMPLATES_SIMD_SUM_H__
-#define __TEMPLATES_SIMD_SUM_H__
+#pragma once
 
 #include "glog/logging.h"
 
@@ -10,7 +9,7 @@
 #include <vector>
 #include <xmmintrin.h>
 
-namespace templates {
+namespace examples {
 namespace functor {
 namespace {
 // 使用 float 类型作为一个例子
@@ -119,6 +118,4 @@ void Sum(std::vector<T>& dst, const std::vector<T>& src) {
   functor::SumImpl<T>()(dst.data(), src.data(), src.size());
 }
 
-}  // namespace templates
-
-#endif
+}  // namespace examples
