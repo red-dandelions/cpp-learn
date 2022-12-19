@@ -1,5 +1,6 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
+load("//third_party:pybind11/repo.bzl", "pybind11_local_repository")
 
 # gflags
 http_archive(
@@ -44,4 +45,36 @@ http_archive(
     name = "com_github_google_benchmark",
     strip_prefix = "benchmark-1.7.0",
     urls = ["https://github.com/google/benchmark/archive/refs/tags/v1.7.0.tar.gz"],
+)
+
+# pybind11 相关
+http_archive(
+    name = "rules_python",
+    sha256 = "15f84594af9da06750ceb878abbf129241421e3abbd6e36893041188db67f2fb",
+    strip_prefix = "rules_python-0.7.0",
+    url = "https://github.com/bazelbuild/rules_python/archive/refs/tags/0.7.0.tar.gz",
+)
+
+http_archive(
+    name = "pybind11_bazel",
+    strip_prefix = "pybind11_bazel-72cbbf1fbc830e487e3012862b7b720001b70672",
+    urls = ["https://github.com/pybind/pybind11_bazel/archive/72cbbf1fbc830e487e3012862b7b720001b70672.zip"],
+)
+
+http_archive(
+    name = "pybind11",
+    build_file = "@pybind11_bazel//:pybind11.BUILD",
+    strip_prefix = "pybind11-2.9.1",
+    urls = ["https://github.com/pybind/pybind11/archive/v2.9.1.tar.gz"],
+)
+
+pybind11_local_repository(
+    name = "pybind11_utils",
+    build_defs_tpl = "//third_party:pybind11/build_defs.bzl",
+)
+
+load("@pybind11_bazel//:python_configure.bzl", "python_configure")
+python_configure(
+    name = "local_config_python",
+    python_version = "3",
 )
