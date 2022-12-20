@@ -20,15 +20,14 @@ struct MutexLocker {
 
 bool RingBuffer::init(size_t size) {
   capacity_ = evaluate_aligned_size(size);
-  size_ = 0;
   buffer_ = reinterpret_cast<uint8_t*>(
       mmap(nullptr, capacity_, PROT_WRITE | PROT_READ, MAP_SHARED | MAP_ANONYMOUS, -1, 0));
   if (buffer_ == MAP_FAILED) {
     LOG(ERROR) << "mmap failed, error: " << std::strerror(errno) << ", mmap_size: " << capacity_;
     return false;
   }
-  write_ = buffer_;
-  read_ = buffer_;
+  write_ = nullptr;
+  read_ = nullptr;
 
   // init mutex
   pthread_mutexattr_t mutex_attr = {};
@@ -49,6 +48,10 @@ RingBuffer::~RingBuffer() {
 
 void RingBuffer::push(Node node) {
   MutexLocker lock(&mutex_);
+  if (empty()) {
+    read_ = buffer_;
+    write_ = buffer_;
+  }
   size_t data_size = evaluate_aligned_size(node.size);
   size_t size = sizeof(node.size) + data_size;
   if (size > capacity_) {
@@ -56,8 +59,26 @@ void RingBuffer::push(Node node) {
     return;
   }
 
-  while (capacity_ - size_ < size) {
-    pop();
+  while (capacity_ - (((write_ - read_) + capacity_) % capacity_) < size) {
+    size_t node_data_size = *reinterpret_cast<size_t*>(read_);
+    size_t offset = 8 + evaluate_aligned_size(node_data_size);
+
+    size_t left_size = capacity_ - (read_ - buffer_);
+
+    if (left_size < offset) {
+      read_ = buffer_ + offset - left_size;
+    } else {
+      read_ += offset;
+    }
+
+    if (read_ - buffer_ == capacity_) {
+      read_ = buffer_;
+    }
+
+    if (read_ == write_) {
+      read_ = buffer_;
+      write_ = buffer_;
+    }
   }
 
   // 填写 data size
@@ -75,7 +96,6 @@ void RingBuffer::push(Node node) {
     write_ += data_size;
   }
 
-  size_ += size;
   if (write_ - buffer_ == capacity_) {
     write_ = buffer_;
   }
@@ -83,7 +103,7 @@ void RingBuffer::push(Node node) {
 
 RingBuffer::Node RingBuffer::pop() {
   MutexLocker lock(&mutex_);
-  if (size_ == 0) {
+  if (empty()) {
     LOG(WARNING) << "RingBuffer has no data.";
     return Node{.size = 0, .data = std::vector<uint8_t>()};
   }
@@ -107,9 +127,15 @@ RingBuffer::Node RingBuffer::pop() {
   }
 
   node.data.resize(size);
-  size_ -= (sizeof(node.size) + evaluate_aligned_size(node.size));
+
   if (read_ - buffer_ == capacity_) {
     read_ = buffer_;
+  }
+
+  // 没有数据将指针置为空
+  if (read_ == write_) {
+    read_ = nullptr;
+    write_ = nullptr;
   }
 
   return node;
