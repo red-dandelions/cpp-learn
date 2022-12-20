@@ -1,20 +1,43 @@
 #include "ringbuffer.h"
+
 #include "glog/logging.h"
+
 #include <cstring>
+#include <pthread.h>
 #include <sys/mman.h>
 
 namespace datastructure {
 namespace queue {
+namespace {
+struct MutexLocker {
+  explicit MutexLocker(pthread_mutex_t* mutex) : mutex_(mutex) {
+    CHECK(pthread_mutex_lock(mutex_) == 0) << " err_msg: " << strerror(errno);
+  }
+  ~MutexLocker() { CHECK(pthread_mutex_unlock(mutex_) == 0) << " err_msg: " << strerror(errno); }
+  pthread_mutex_t* mutex_;
+};
+}  // namespace
 
 bool RingBuffer::init(size_t size) {
   capacity_ = evaluate_aligned_size(size);
-  buffer_ = reinterpret_cast<uint8_t*>(mmap(nullptr, capacity_, PROT_WRITE | PROT_READ, MAP_SHARED | MAP_ANONYMOUS, -1, 0));
+  size_ = 0;
+  buffer_ = reinterpret_cast<uint8_t*>(
+      mmap(nullptr, capacity_, PROT_WRITE | PROT_READ, MAP_SHARED | MAP_ANONYMOUS, -1, 0));
   if (buffer_ == MAP_FAILED) {
     LOG(ERROR) << "mmap failed, error: " << std::strerror(errno) << ", mmap_size: " << capacity_;
     return false;
   }
   write_ = buffer_;
   read_ = buffer_;
+
+  // init mutex
+  pthread_mutexattr_t mutex_attr = {};
+  CHECK(pthread_mutexattr_init(&mutex_attr) == 0) << " err_msg: " << strerror(errno);
+  CHECK(pthread_mutexattr_setpshared(&mutex_attr, PTHREAD_PROCESS_SHARED) == 0)
+      << " err_msg: " << strerror(errno);
+  CHECK(pthread_mutex_init(&mutex_, &mutex_attr) == 0) << " err_msg: " << strerror(errno);
+  CHECK(pthread_mutexattr_destroy(&mutex_attr) == 0) << " err_msg: " << strerror(errno);
+
   return true;
 }
 
@@ -25,6 +48,7 @@ RingBuffer::~RingBuffer() {
 }
 
 void RingBuffer::push(Node node) {
+  MutexLocker lock(&mutex_);
   size_t data_size = evaluate_aligned_size(node.size);
   size_t size = sizeof(node.size) + data_size;
   if (size > capacity_) {
@@ -58,6 +82,7 @@ void RingBuffer::push(Node node) {
 }
 
 RingBuffer::Node RingBuffer::pop() {
+  MutexLocker lock(&mutex_);
   if (size_ == 0) {
     LOG(WARNING) << "RingBuffer has no data.";
     return Node{.size = 0, .data = std::vector<uint8_t>()};
@@ -90,5 +115,5 @@ RingBuffer::Node RingBuffer::pop() {
   return node;
 }
 
-} // namespace queue
-} // namespace datastructure
+}  // namespace queue
+}  // namespace datastructure

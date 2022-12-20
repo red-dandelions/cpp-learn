@@ -5,12 +5,12 @@
 namespace datastructure {
 namespace queue {
 namespace {
-#define SIZE  (1 << 20) // 1 Mb
+#define SIZE (1 << 20)  // 1 Mb
 #define ALIGN_MASK 7
-} // namespace
+}  // namespace
 
 class RingBuffer {
-public:
+ public:
   struct Node {
     size_t size;
     std::vector<uint8_t> data;
@@ -24,21 +24,21 @@ public:
   RingBuffer(RingBuffer&&) = delete;
   RingBuffer& operator=(RingBuffer&&) const = delete;
 
-  bool init(size_t size=SIZE);
+  bool init(size_t size = SIZE);
+  bool empty() { return size_ == 0; }
   void push(Node node);
   Node pop();
 
-private:
+ private:
   //  按 8 字节对齐
-  size_t evaluate_aligned_size(size_t size) {
-    return (size + ALIGN_MASK) & (~ALIGN_MASK);
-  }
+  size_t evaluate_aligned_size(size_t size) { return (size + ALIGN_MASK) & (~ALIGN_MASK); }
   size_t capacity_;
   size_t size_;
   uint8_t* buffer_;
   uint8_t* write_;
   uint8_t* read_;
+  pthread_mutex_t mutex_;
 };
 
-} // namespace queue
-} // namespace datastructure
+}  // namespace queue
+}  // namespace datastructure

@@ -6,3 +6,14 @@ cc_test(
     "@com_google_googletest//:gtest_main",
   ]
 )
+
+cc_binary(
+  name = "ringbuffer_benchmark",
+  srcs = [
+    "ringbuffer_benchmark.cc",
+  ],
+  deps = [
+    "//cpp/datastructure/queue:queue",
+    "@com_github_google_benchmark//:benchmark",
+  ]
+)
