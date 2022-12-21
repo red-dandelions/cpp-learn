@@ -17,9 +17,12 @@ TIP: 测试警告
 ./format.sh
 ----
 
+== TODO
+
 * [ ] 时间轮的实现
 * [ ] 时间堆的实现
 * [x] signal使用例子
+* [x] 修复 ringbuffer 多进程失败
 
 . test
 . test
