@@ -1,0 +1,131 @@
+:stem: latexmath
+= cpp-learn
+用来记录学习 c++
+
+== 开发环境指南
+```bash
+# 构建镜像命令
+docker-compose build develop-image
+
+# 拉取最新镜像
+docker-compose pull develop
+
+# 启动环境
+docker-compose up -d develop
+
+# 进入开发环境，以下命令其中一个都可以
+docker-compose run --rm develop bash
+docker-compose exec develop bash
+
+# 启动多组容器
+docker-compose up
+```
+
+== 代码补全
+```bash
+# 生成 compile_commands.json 文件
+bazel run @hedron_compile_commands//:refresh_all
+
+# 或者执行脚本
+./gen_compile_commands.sh
+```
+
+== 格式化代码
+```bash
+# 格式化所有源文件
+bash format.sh
+
+# 格式化制定目录下所有源文件
+./format.sh {dirname}
+
+# 格式化单个文件
+clang-format -style=file -i {filename}
+```
+
+---
+== TODO
+=== c++ 使用例子
+* [x] 类内存模型打印
+* [x] 条件变量使用
+* [x] 模板使用
+* [x] 线程使用
+* [ ] promese future 使用
+* [x] 语法: lambda 函数、initializer_list 使用、typeinfo 使用、空指针调用类成员函数、placement_new 使用、模板可变参数和完美转发、enum class 使用
+
+---
+=== Data Structure and Algorithm
+==== hash
+* [x] murmurhash
+* [x] md5
+* [x] crc32
+
+==== queue
+* [ ] ringbuffer
+
+==== search
+* [x] UFS 并查集
+
+==== tree
+* [x] BinaryIndexTree 树状数组
+* [ ] SegmentTree 线段树
+
+==== math
+* [x] 排列组合数快速计算: stem:[C^m_n]
+
+---
+=== 一些有用功能的实现
+* [x] 布隆过滤器
+* [x] 伙伴内存分配算法
+* [x] 基于共享内存实现的消息队列
+* [x] 线程池的实现
+* [x] 计时器
+* [x] 自旋锁
+* [x] SIMD 加速例子
+* [x] 基于偏移量的指针
+* [x] 单例模式模板基类
+* [x] 阻塞队列
+* [x] 调用指定动态库里的函数
+
+---
+=== 设计模式
+* [x] 单例模式
+* [ ] other ...
+
+---
+=== network
+* [x] 客户端和服务端实现例子
+* [x] io 复用: select, poll, epoll 使用
+* [ ] 时间轮的实现
+* [ ] 时间堆的实现
+* [x] signal使用例子
+* [ ] reactor, proactor模式实现
+
+---
+=== unix api 使用例子
+* [x] change_user 更改用户
+* [x] daemon 守护进程
+* [x] fifo 管道
+* [x] mmap 映射
+* [x] pipe, popen
+* [x] sendfile, splice 实现零拷贝使用的函数
+* [x] set nonblock
+
+---
+=== homework
+==== CSAPP
+* [ ] data lab
+* [ ] bomb lab
+* [ ] attack lab
+* [ ] architecture lab
+* [ ] cache lab
+* [ ] performance lab
+* [ ] shell lab
+* [x] malloc lab
+* [ ] proxy lab
+* [ ] 优化 malloc lab
+
+---
+=== third_party
+* [x] 第三方库: benchmark、glog、grpc、gtest、json、protobuf 使用
+* [x] pybind11 使用
+* [ ] promethues、skywalking 封装使用
