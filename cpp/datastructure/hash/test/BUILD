@@ -24,3 +24,12 @@ cc_test(
     "@com_google_googletest//:gtest_main",
   ],
 )
+
+cc_test(
+  name = "string_roll_hash_test",
+  srcs = ["string_roll_hash_test.cc"],
+  deps = [
+    "//cpp/datastructure/hash:hash",
+    "@com_google_googletest//:gtest_main",
+  ],  
+)
