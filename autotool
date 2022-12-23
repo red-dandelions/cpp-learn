@@ -120,8 +120,14 @@ _parse_options() {
 _build() {
   # 没有指定文件夹，默认全部编译
   if [[ "$dir_" == "" ]]; then
-    bazel build //... -c dbg
-    exit 0
+    $(bazel build //... -c dbg &>/dev/null)
+    if [[ $? != 0 ]]; then
+      echo -e "build //... \033[31m error \033[0m"
+      exit 1
+    else
+      echo -e "build //... \033[32m success \033[0m"
+      exit 0
+    fi
   fi
 
   _find_dirs
@@ -180,9 +186,9 @@ _build() {
 _complete() {
   $(bazel run @hedron_compile_commands//:refresh_all &>/dev/null)
   if [[ $? == 0 ]]; then
-    echo -e "\033[32msuccess\033[0m"
+    echo -e "complate \033[32msuccess\033[0m"
   else
-    echo -e "\033[31merror\033[0m"
+    echo -e "complete \033[31merror\033[0m"
   fi
 }
 
@@ -192,7 +198,7 @@ _format() {
     find $_base_dir -iname '*.cc' -o -iname '*.cpp' -o -iname '*.c' -o -iname '*.h' | \
         xargs clang-format -style=file -i
     # 默认不指定目录时，格式化所有代码，然后退出
-    echo -e "format all directories \033[32m success \033[0m!"
+    echo -e "format all directories \033[32msuccess\033[0m"
     exit 0    
   fi
 
@@ -252,13 +258,13 @@ _main() {
   shift
   _parse_options "$@"
   case $_function in
-    "build")
+    "build" | "-b")
       _build
       ;;
-    "complete")
+    "complete" | "-c")
       _complete
       ;;
-    "format")
+    "format" | "-f")
       _format
       ;;
     "run")
