@@ -10,14 +10,14 @@ _usage() {
     run             - 运行程序
     help            - 打印 usage
   
-  format options:
-    -d              - 指定格式化文件夹, 支持通配符匹配
-  
   build options:
     -d              - 默认编译指定文件夹下所有 BUILD 中的 target, 支持通配符匹配
     -r              - 编译后运行指定的 target
     -t              - 需要指定 -d, 编译指定文件夹当前目录下 BUILD 文件中指定的 target
-    
+  
+  format options:
+    -d              - 指定格式化文件夹, 支持通配符匹配
+      
   run options:
     -d              - 指定目录下的 target
     -t              - 运行 BUILD 中 指定的 target"
@@ -176,6 +176,16 @@ _build() {
   fi
 }
 
+# 补全代码
+_complete() {
+  $(bazel run @hedron_compile_commands//:refresh_all &>/dev/null)
+  if [[ $? == 0 ]]; then
+    echo -e "\033[32msuccess\033[0m"
+  else
+    echo -e "\033[31merror\033[0m"
+  fi
+}
+
 # 格式化代码
 _format() {
   if [[ "$dir_" == "" ]]; then
@@ -242,11 +252,14 @@ _main() {
   shift
   _parse_options "$@"
   case $_function in
-    "format")
-      _format
-      ;;
     "build")
       _build
+      ;;
+    "complete")
+      _complete
+      ;;
+    "format")
+      _format
       ;;
     "run")
       _run
