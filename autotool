@@ -1,13 +1,14 @@
 #!/bin/bash
-set -e
 
 # 使用说明
 _usage() {
   use_str="usage: autotool function [options]
   function:
     build           - 编译代码
+    complete        - 补全代码
     format          - 格式化代码，默认格式化所有代码
     run             - 运行程序
+    help            - 打印 usage
   
   format options:
     -d              - 指定格式化文件夹, 支持通配符匹配
@@ -18,35 +19,92 @@ _usage() {
     -t              - 需要指定 -d, 编译指定文件夹当前目录下 BUILD 文件中指定的 target
     
   run options:
+    -d              - 指定目录下的 target
     -t              - 运行 BUILD 中 指定的 target"
   echo "$use_str"
 }
 
-while getopts "d:" opts; do
-  echo $opts
-done
+# 检查参数是否合理
+_check() {
+  # 检查 -d 参数
+  # 去掉 / 开头
+  while [[ "$dir_" != "" && $dir_ =~ ^\/.* ]]; do
+    dir_="`echo "$dir_" | sed 's/\///'`"
+  done
+  # 去掉 /* 结尾
+  while [[ "$dir_" != "" && $dir_ =~ .*\/\*$ ]]; do
+    dir_="`echo "$dir_" | sed 's/\/\*$//'`"
+  done
+  if [[ "$dir_" != "" && $dir_ =~ ^-.* ]]; then
+    echo "-d has an illegal value."
+    _usage
+    exit 1
+  fi
+
+  # 检查 -t 参数
+  if [[ "$target_" != "" && $target_ =~ ^-.* ]]; then
+    echo "-t need a value"
+    _usage
+    exit 1
+  fi
+}
+
+# 查找文件夹
+_find_dirs() {
+  # 没有指定 -d 参数，返回
+  if [ "$dir_" == "" ]; then
+    return
+  fi
+
+  local pattern=$(echo "$dir_" | sed 's/\//\/\//g' | sed 's/\/\*\//\/[a-zA-Z0-9_]*\//g' | sed 's/^\*/\/[a-zA-Z0-9_]\*/' | sed 's/\/\//\//g')
+  local last_dirs=$(echo "$dir_" | awk -F/ '{print $NF}')
+  directories=$(find $_base_dir -name "$last_dirs" -type d | grep "$pattern")
+
+  # echo "curdirs: "${cur_dirs[@]}
+  # 找到的目标文件夹
+  #directories=$dirs
+}
+
+# 查找 target
+_find_targets() {
+  build_targets=()
+  for d in ${directories[@]}; do
+    local targets=$(cat $(find $d -name "BUILD" -maxdepth 1 -type f) | grep "name" | grep "$target_" | awk -F\" '{print $2}')
+    if [[ "$targets" != "" ]]; then
+      d=$(echo "$d" | sed 's/^\./\//')
+      for t in $targets; do
+        build_targets+=("$d:$t")
+      done
+    fi
+  done
+}
 
 # 解析参数
 _parse_options() {
+  _opts="d:hrt:"
   while getopts $_opts opt; do
     case $_function'_'$opt in
       # 解析 build 参数
       $_function'_d')
-        dir_=$OPTARG
+        dir_="$OPTARG"
         ;;
       $_function'_r')
         run_="true"
         ;;
       $_function'_t')
-        target_=$OPTARG
+        target_="$OPTARG"
         ;;
       # 解析 format 参数
       $_function'_d')
-        dir_=$OPTARG
+        dir_="$OPTARG"
         ;;
       # 解析 run 参数
       $_function'_t')
-        run_=$OPTARG
+        target_="$OPTARG"
+        ;;
+      "-h")
+        _usage
+        exit 0
         ;;
       *)
         _usage
@@ -54,60 +112,155 @@ _parse_options() {
         ;;
     esac
   done
+
+  _check
 }
 
 # 编译代码
 _build() {
-  echo "build"
+  # 没有指定文件夹，默认全部编译
+  if [[ "$dir_" == "" ]]; then
+    bazel build //... -c dbg
+    exit 0
+  fi
+
+  _find_dirs
+
+  # 没有找到目录就退出
+  if [[ "${directories[@]}" == "" ]]; then
+    echo "not find dir: $dir_!"
+    exit 1
+  else
+    # 没有指定 target
+    if [[ "$target_" == "" ]]; then
+      for d in ${directories[@]}; do
+        d=$(echo "$d" | sed 's/^\./\//')
+        $(bazel build "$d/..." -c dbg  &>/dev/null)
+        if [[ $? != 0 ]]; then
+          echo -e "build $d/... \033[31m error \033[0m"
+        else
+          echo -e "build $d/... \033[32m success \033[0m"
+        fi
+      done
+    else
+      # 指定 target
+      _find_targets
+      if [[ "${build_targets[@]}" == "" ]]; then
+        echo "not find target: $target_"
+        exit 1
+      else
+        for t in ${build_targets[@]}; do
+          $(bazel build $t -c dbg &>/dev/null)
+          if [[ $? != 0 ]]; then
+            echo -e "build $t \033[31m error \033[0m"
+          else
+            echo -e "build $t \033[32m success \033[0m"
+          fi
+        done
+      fi
+    fi
+  fi
 
   # 编译后运行
   if [ "$run_" == "true" ]; then
-    _run
+    for t in ${build_targets[@]}; do
+      t=$(echo $t | sed 's/^\//bazel-bin/' | sed 's/:/\//')
+      if test -x $t; then
+        echo ""
+        echo -e "run: \033[32m $t\033[0m"
+        ./$t
+      else
+        echo "not find"
+      fi
+    done
   fi
 }
 
 # 格式化代码
 _format() {
-  dirs=$(echo $dir_ | tr '/' ' ')
-  echo $dirs
-  for d in $dirs; do
-    res=$(find $_base -name "*$d*" -type d)
-    echo $res
-  done
-  dirs=$(find $_base -name "*$dir_*" -type d)
+  if [[ "$dir_" == "" ]]; then
+    find $_base_dir -iname '*.cc' -o -iname '*.cpp' -o -iname '*.c' -o -iname '*.h' | \
+        xargs clang-format -style=file -i
+    # 默认不指定目录时，格式化所有代码，然后退出
+    echo -e "format all directories \033[32m success \033[0m!"
+    exit 0    
+  fi
+
+  _find_dirs
+
+  # 搜寻不到目录就退出
+  if [[ "${directories[@]}" == "" ]]; then
+    echo "not find dir: $dir_!"
+  else
+    for d in ${directories[@]}; do
+      $(find $d -iname '*.cc' -o -iname '*.cpp' -o -iname '*.c' -o -iname '*.h' | \
+          xargs clang-format -style=file -i)
+      if [[ $? != 0 ]]; then
+        echo -e "format directory: $d \033[31m error \033[0m!"
+      else
+        echo -e "format directory: $d \033[32m success \033[0m!"
+      fi
+    done
+  fi
 }
 
 # 运行代码
 _run() {
-  echo "run"
+  if [[ "$dir_" == "" || "$target_" == "" ]]; then
+    echo "you need to add -d and -t"
+    exit 1
+  fi
+
+  _find_dirs
+  # 没有找到目录就退出
+  if [[ "${directories[@]}" == "" ]]; then
+    echo "not find dir: $dir_!"
+    exit 1
+  else
+    # 寻找 target，找不到就退出
+    _find_targets
+    if [[ "${build_targets[@]}" == "" ]]; then
+      echo "not find target: $target_"
+      exit 1
+    else
+      for t in ${build_targets[@]}; do
+        t=$(echo $t | sed 's/^\//bazel-bin/' | sed 's/:/\//')
+        if test -x $t; then
+          echo ""
+          echo -e "run: \033[32m $t\033[0m"
+          ./$t
+        else
+          echo "not find"
+        fi
+      done
+    fi 
+  fi
 }
 
 _main() {
-  _function=$1
+  _function="$1"
   shift
+  _parse_options "$@"
   case $_function in
     "format")
-      _opts="d:"
-      _parse_options $@
       _format
       ;;
     "build")
-    _opts="d:rt:"
-      _parse_options $@
       _build
       ;;
     "run")
-      _opts="t:"
-      _parse_options $@
       _run
+      ;;
+    "--help" | "-h" | "help" | "h")
+      _usage
       ;;
     *)
        echo "unknow function"
-       echo ""
        _usage
       ;;
   esac
 }
 
-_base=$(dirname $0)
-_main $@
+# 获取当前目录
+_base_dir=$(dirname $0)
+_main "$@"

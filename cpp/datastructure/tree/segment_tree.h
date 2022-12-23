@@ -49,7 +49,7 @@ class SegmentTree {
   }
 
   void range_add(int32_t l, int32_t r, T value) {
-    std::function<void(int32_t,int32_t)> _update;
+    std::function<void(int32_t, int32_t)> _update;
     _update = [&](int32_t cl, int32_t cr, int32_t root) {
 
     };
@@ -58,7 +58,7 @@ class SegmentTree {
   }
 
   void range_set(int32_t l, int32_t r, T value) {
-    std::function<void(int32_t,int32_t)> _update;
+    std::function<void(int32_t, int32_t)> _update;
     _update = [&](int32_t cl, int32_t cr, int32_t root) {
 
     };
