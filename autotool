@@ -1,0 +1,113 @@
+#!/bin/bash
+set -e
+
+# 使用说明
+_usage() {
+  use_str="usage: autotool function [options]
+  function:
+    build           - 编译代码
+    format          - 格式化代码，默认格式化所有代码
+    run             - 运行程序
+  
+  format options:
+    -d              - 指定格式化文件夹, 支持通配符匹配
+  
+  build options:
+    -d              - 默认编译指定文件夹下所有 BUILD 中的 target, 支持通配符匹配
+    -r              - 编译后运行指定的 target
+    -t              - 需要指定 -d, 编译指定文件夹当前目录下 BUILD 文件中指定的 target
+    
+  run options:
+    -t              - 运行 BUILD 中 指定的 target"
+  echo "$use_str"
+}
+
+while getopts "d:" opts; do
+  echo $opts
+done
+
+# 解析参数
+_parse_options() {
+  while getopts $_opts opt; do
+    case $_function'_'$opt in
+      # 解析 build 参数
+      $_function'_d')
+        dir_=$OPTARG
+        ;;
+      $_function'_r')
+        run_="true"
+        ;;
+      $_function'_t')
+        target_=$OPTARG
+        ;;
+      # 解析 format 参数
+      $_function'_d')
+        dir_=$OPTARG
+        ;;
+      # 解析 run 参数
+      $_function'_t')
+        run_=$OPTARG
+        ;;
+      *)
+        _usage
+        exit 1
+        ;;
+    esac
+  done
+}
+
+# 编译代码
+_build() {
+  echo "build"
+
+  # 编译后运行
+  if [ "$run_" == "true" ]; then
+    _run
+  fi
+}
+
+# 格式化代码
+_format() {
+  dirs=$(echo $dir_ | tr '/' ' ')
+  echo $dirs
+  for d in $dirs; do
+    res=$(find $_base -name "*$d*" -type d)
+    echo $res
+  done
+  dirs=$(find $_base -name "*$dir_*" -type d)
+}
+
+# 运行代码
+_run() {
+  echo "run"
+}
+
+_main() {
+  _function=$1
+  shift
+  case $_function in
+    "format")
+      _opts="d:"
+      _parse_options $@
+      _format
+      ;;
+    "build")
+    _opts="d:rt:"
+      _parse_options $@
+      _build
+      ;;
+    "run")
+      _opts="t:"
+      _parse_options $@
+      _run
+      ;;
+    *)
+       echo "unknow function"
+       echo ""
+       _usage
+      ;;
+  esac
+}
+
+_base=$(dirname $0)
+_main $@
