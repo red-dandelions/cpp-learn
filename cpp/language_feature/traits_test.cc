@@ -6,6 +6,7 @@
  **************************************************************************************************/
 
 #include <cstdlib>
+#include <functional>
 #include <initializer_list>
 #include <iostream>
 #include <string>
@@ -65,6 +66,18 @@ enum class 八卦 : int64_t {
   离   // 南
 };
 
+void lambda() {
+  std::function<int(int)> fib;
+  fib = [&](int n) -> int {
+    if (n == 0) return 0;
+    if (n == 1 || n == 2) {
+      return 1;
+    }
+    return fib(n - 1) + fib(n - 2);
+  };
+  std::cout << "fib(7): " << fib(7) << std::endl;
+}
+
 int main() {
   function(1, 1);
   function<std::string, int>("test", 2);
@@ -83,6 +96,8 @@ int main() {
 
   八卦 a = 八卦::乾;
   std::cout << "乾: " << int64_t(a) << std::endl;
+
+  lambda();
 
   return 0;
 }
