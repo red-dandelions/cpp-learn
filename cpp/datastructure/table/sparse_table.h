@@ -11,6 +11,11 @@ class SparseTable {
  public:
   using Func = std::function<T(const T &, const T &)>;
 
+  // f(i, j) 表示 [i, i + 2^j - 1] 区间最大值
+  // [i, i + 2^j - 1]             ->  [i, i + 2^(j - 1) - 1] + [i + 2^(j - 1), i + 2^j - 1]
+  // [i, i + 2^(j - 1) - 1]       ->  f(i, j - 1);
+  // [i + 2^(j - 1), i + 2^j - 1] ->  f(i + 2^(j - 1), j - 1);
+  // 所以 f(i, j) = max(f(i, j - 1), f(i + 2^(j - 1), j - 1))
   SparseTable(const std::vector<T> &v, Func func = _max) {
     op_ = func;
     int len = v.size(), l1 = std::ceil(log2(len)) + 1;
@@ -27,6 +32,10 @@ class SparseTable {
     }
   }
 
+  // [l, r] -> max([l, l + 2^s - 1], [r - 2^s + 1, r])
+  // s = log2(r - l + 1)
+  // [l, l + 2^s - 1] -> f(l, s)
+  // r - 2^s + 1, r]  -> f(r - 2^s + 1, s)
   T query(int32_t l, int32_t r) {
     int32_t lt = r - l + 1;
     int32_t q = std::ceil(std::log2(lt)) - 1;
