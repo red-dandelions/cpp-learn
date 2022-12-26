@@ -6,16 +6,27 @@ namespace tree {
 template <typename T>
 class SegmentTree {
  public:
-  void build(int32_t root, int32_t cl, int32_t cr) {
-    if (cl == cr) {
-      tree_[root] = data_[cl];
+  void init(std::vector<T>& v, bool init_value = true) {
+    tree_.resize(v.size() * 4, 0);
+    lazy_.resize(v.size() * 4, 0);
+    if (!init_value) {
+      // 不需要初始化值，则返回
       return;
     }
-    int32_t cm = cl + (cr - cl) / 2;
-    build(root * 2 + 1, cl, cm);
-    build(root * 2 + 2, cm + 1, cl);
+    std::function<void (int32_t, int32_t, int32_t)> _build;
+    _build = [&](int32_t root, int32_t cl, int32_t cr) -> void {
+      if (cl == cr) {
+        tree_[root] = v[cl];
+        return;
+      }
+      int32_t cm = cl + (cr - cl) / 2;
+      _build(root * 2 + 1, cl, cm);
+      _build(root * 2 + 2, cm + 1, cr);
 
-    tree_[root] = tree_[root * 2 + 1] + tree_[root * 2 + 2];
+      tree_[root] = tree_[root * 2 + 1] + tree_[root * 2 + 2];
+    };
+
+    _build(0, 0, v.size() - 1);
   }
 
   // [query_l, query_r] 为查询区间
@@ -45,30 +56,67 @@ class SegmentTree {
       return sum;
     };
 
-    return _query(0, data_.size() - 1, 0);
+    return _query(0, tree_.size() / 4 - 1, 0);
   }
 
   void range_add(int32_t l, int32_t r, T value) {
-    std::function<void(int32_t, int32_t)> _update;
+    std::function<void(int32_t, int32_t, int32_t)> _update;
     _update = [&](int32_t cl, int32_t cr, int32_t root) {
+      if (l <= cl && cr <= r) {
+        lazy_[root] += value;
+        tree_[root] += (cr - cl + 1) * value;
+        return;
+      }
 
+      _maintain(cl, cr, root);
+
+      int cm = cl + (cr - cl) / 2;
+      if (l <= cm) _update(cl, cm, root * 2 + 1);
+      if (cm < r) _update(cm + 1, cr, root * 2 + 2);
+      tree_[root] = tree_[root * 2 + 1] + tree_[root * 2 + 2];
     };
 
-    _update(0, data_.size() - 1, 0);
+    _update(0, tree_.size() / 4 - 1, 0);
   }
 
   void range_set(int32_t l, int32_t r, T value) {
-    std::function<void(int32_t, int32_t)> _update;
-    _update = [&](int32_t cl, int32_t cr, int32_t root) {
-
+    // TODO: 区间求和的 lazy_ 
+    auto _set_maintain = [&](int32_t cl, int32_t cr, int32_t root) {
+      int cm = cl + (cr - cl) / 2;
+      if (cl != cr && lazy_[root]) {
+        lazy_[root * 2 + 1] = lazy_[root];
+        lazy_[root * 2 + 2] = lazy_[root];
+        tree_[root * 2 + 1] = (cm - cl + 1) * lazy_[root];
+        tree_[root * 2 + 2] = (cr - cm) * lazy_[root];
+        lazy_[root] = 0;
+      }
     };
-    _update(0, data_.size(), 0);
+
+    std::function<void(int32_t, int32_t, int32_t)> _update;
+    _update = [&](int32_t cl, int32_t cr, int32_t root) {
+      if (l <= cl && cr <= r) {
+        lazy_[root] = value;
+        tree_[root] = (cr - cl + 1) * value;
+        return;
+      }
+
+      _set_maintain(cl, cr, root);
+
+      int32_t cm = cl + (cr - cl) / 2;
+      if (cl <= cm) _update(cl, cm, root * 2 + 1);
+      if (cm < cr) _update(cm + 1, cr, root * 2 + 2);
+      tree_[root] = tree_[root * 2 + 1] + tree_[root * 2 + 2];
+    };
+    _update(0, tree_.size() / 4 - 1, 0);
   }
 
  private:
   void _maintain(int32_t cl, int32_t cr, int32_t root) {
     int cm = cl + (cr - cl) / 2;
     if (cl != cr && lazy_[root]) {
+      // 更新左右孩子的 lazy 标记
+      // 更新左右孩子的值
+      // 将父节点的 lazy 标记清空
       lazy_[root * 2 + 1] += lazy_[root];
       lazy_[root * 2 + 2] += lazy_[root];
       tree_[root * 2 + 1] += lazy_[root] * (cm - cl + 1);
@@ -76,7 +124,6 @@ class SegmentTree {
       lazy_[root] = 0;
     }
   }
-  std::vector<T> data_;  // 存放原始数据
   std::vector<T> tree_;
   std::vector<T> lazy_;  // 懒惰标记
 };
