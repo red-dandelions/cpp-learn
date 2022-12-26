@@ -1,15 +1,19 @@
 = 问题记录
 
 ---
-
 Question 1::
   多进程中变量不共享问题。比如有一个 Foo 类，主进程 fork 一个子进程，在子进程中调用了 Foo 类的 a 函数成员，函数 a 对变量成员 b 修改，但是在主进程中 Foo 类的 b 成员并没有改变。
 
 ---
 
 ---
-
 Question 2::
+  vscode 中代码补全还是报红，可能为BUILD中没有 target，增加 target 之后再使用代码补全。
+
+---
+
+---
+Question 3::
   continue...
 
 ---
