@@ -33,3 +33,12 @@ cc_binary(
     "@com_github_google_benchmark//:benchmark",
   ],
 )
+
+cc_test(
+  name = "trie_test",
+  srcs = ["trie_test.cc"],
+  deps = [
+    "//cpp/datastructure/tree:tree",
+    "@com_google_googletest//:gtest_main",
+  ],
+)
