@@ -21,25 +21,16 @@ docker-compose exec develop bash
 docker-compose up
 ```
 
-== 代码补全
+== autotool 工具使用
 ```bash
-# 生成 compile_commands.json 文件
-bazel run @hedron_compile_commands//:refresh_all
+# 查看使用
+./autotool -h
 
-# 或者执行脚本
-./gen_compile_commands.sh
-```
+# 代码补全
+./autotool -c
 
-== 格式化代码
-```bash
-# 格式化所有源文件
-bash format.sh
-
-# 格式化制定目录下所有源文件
-./format.sh {dirname}
-
-# 格式化单个文件
-clang-format -style=file -i {filename}
+# 格式化代码
+./autotool -f
 ```
 
 ---
@@ -54,14 +45,18 @@ clang-format -style=file -i {filename}
 
 ---
 === Data Structure and Algorithm
+==== stack
+* [x] stack 链表实现
+* [x] 单调栈例子
+
+==== queue
+* [ ] ringbuffer
+
 ==== hash
 * [x] murmurhash
 * [x] md5
 * [x] crc32
 * [x] string_roll_hash 滚动哈希
-
-==== queue
-* [ ] ringbuffer
 
 ==== search
 * [x] UFS 并查集
