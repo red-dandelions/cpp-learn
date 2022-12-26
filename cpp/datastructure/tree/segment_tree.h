@@ -13,7 +13,7 @@ class SegmentTree {
       // 不需要初始化值，则返回
       return;
     }
-    std::function<void (int32_t, int32_t, int32_t)> _build;
+    std::function<void(int32_t, int32_t, int32_t)> _build;
     _build = [&](int32_t root, int32_t cl, int32_t cr) -> void {
       if (cl == cr) {
         tree_[root] = v[cl];
@@ -80,7 +80,7 @@ class SegmentTree {
   }
 
   void range_set(int32_t l, int32_t r, T value) {
-    // TODO: 区间求和的 lazy_ 
+    // TODO: 区间求和的 lazy_
     auto _set_maintain = [&](int32_t cl, int32_t cr, int32_t root) {
       int cm = cl + (cr - cl) / 2;
       if (cl != cr && lazy_[root]) {
