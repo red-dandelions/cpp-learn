@@ -65,7 +65,7 @@ docker-compose up
 * [x] BinaryIndexTree 树状数组
 * [x] SegmentTree 线段树
 * [x] 大根堆和小根堆
-* [ ] 配对堆
+* [x] 配对堆
 
 ==== table
 * [x] sparse table表: 用于多次查询区间最值
