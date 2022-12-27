@@ -67,6 +67,7 @@ docker-compose up
 * [x] 大根堆和小根堆
 * [x] 配对堆
 * [x] 字典树
+* [x] 红黑树
 
 ==== table
 * [x] sparse table表: 用于多次查询区间最值

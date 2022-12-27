@@ -42,3 +42,12 @@ cc_test(
     "@com_google_googletest//:gtest_main",
   ],
 )
+
+cc_test(
+  name = "red_black_tree_test",
+  srcs = ["red_black_tree_test.cc"],
+  deps = [
+    "//cpp/datastructure/tree:tree",
+    "@com_google_googletest//:gtest_main",
+  ],
+)
