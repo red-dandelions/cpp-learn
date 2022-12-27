@@ -51,3 +51,12 @@ cc_test(
     "@com_google_googletest//:gtest_main",
   ],
 )
+
+cc_test(
+  name = "huffman_tree_test",
+  srcs = ["huffman_tree_test.cc"],
+  deps = [
+    "//cpp/datastructure/tree:tree",
+    "@com_google_googletest//:gtest_main",
+  ],
+)
