@@ -58,6 +58,7 @@ clang-format -style=file -i {filename}
 * [x] murmurhash
 * [x] md5
 * [x] crc32
+* [x] string_roll_hash 滚动哈希
 
 ==== queue
 * [ ] ringbuffer
@@ -68,6 +69,8 @@ clang-format -style=file -i {filename}
 ==== tree
 * [x] BinaryIndexTree 树状数组
 * [ ] SegmentTree 线段树
+* [x] 大根堆和小根堆
+* [ ] 配对堆
 
 ==== math
 * [x] 排列组合数快速计算: stem:[C^m_n]
