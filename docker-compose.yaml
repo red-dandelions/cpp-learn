@@ -8,7 +8,7 @@ services:
       dockerfile: Dockerfile
       labels:
         - "MAINTAINER=dandelion000"
-      network: host
+      network: test
 
   develop:
     image: dandelion000/ubuntu:develop
@@ -17,7 +17,7 @@ services:
     command: [ "/usr/bin/tail", "-f", "/dev/null" ]
     working_dir: /root/cpp_learn
     privileged: true
-    network: host
+    network_mode: host
 
 networks:
   test: {}

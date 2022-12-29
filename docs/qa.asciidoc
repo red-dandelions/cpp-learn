@@ -14,6 +14,29 @@ Question 2::
 
 ---
 Question 3::
+  配置.ssh/config文件，免密登陆服务器(vscode 中 ssh config也是一样配置)
+```bash
+    # 每隔600秒发送一个no-op包，保持连接
+    Host *
+        ServerAliveInterval 600
+    Host {跳转机器}
+      HostName {ip}
+      User {user}
+      Port {port}
+      PreferredAuthentications publickey,password,keyboard-interactive
+      IdentityFile {ssh密钥：比如: ~/.ssh/id_rsa}
+
+    Host {目标机器}
+      HostName {ip}
+      User {user}
+      Port {port}
+      PreferredAuthentications publickey,password,keyboard-interactive
+      IdentityFile {ssh密钥：比如: ~/.ssh/id_rsa}
+      ProxyCommand ssh {跳转机器} -q -W %h:%p
+```
+
+---
+Question 4::
   continue...
 
 ---
