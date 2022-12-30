@@ -37,6 +37,11 @@ Question 3::
 
 ---
 Question 4::
+  使用 bazel 构建程序，用 lldb 进行 debug 都是机器码.
+  使用 `bazel build -c dbg --spawn_strategy=local` 或者在 `.bazelrc` 文件中加上 `build --spawn_strategy=local` 和 `bazel -c dbg`
+
+---
+Question 5::
   continue...
 
 ---
