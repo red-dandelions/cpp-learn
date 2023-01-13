@@ -13,4 +13,4 @@ int64_t bin_pow(int64_t v, int64_t p) {
   }
   return result;
 }
-} // namespace algorithm
+}  // namespace algorithm
