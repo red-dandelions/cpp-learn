@@ -189,9 +189,21 @@ void bucket_sort(std::vector<int32_t> &v, int32_t bucket_size = INT32_MAX) {
 
 // 基数排序
 void radix_sort(std::vector<int32_t> &v, int32_t d) {
+  // 快速幂
+  auto _quick_pow = [](int64_t v, int64_t p) {
+    int64_t result = 1;
+    while (p > 0) {
+      if (p & 1) {
+        result *= v;
+      }
+      v *= v;
+      p >>= 1;
+    }
+    return result;
+  };
   // 取得位数上的值
-  auto _fn = [](int32_t value, int32_t i) -> int32_t {
-    int32_t val = i == 0 ? 1 : i * 10;
+  auto _fn = [&_quick_pow](int32_t value, int32_t i) -> int32_t {
+    int32_t val = i == 0 ? 1 : _quick_pow(10, i);
     return (value / val) % 10;
   };
 
