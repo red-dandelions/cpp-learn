@@ -188,7 +188,7 @@ void bucket_sort(std::vector<int32_t> &v, int32_t bucket_size = INT32_MAX) {
 }
 
 // 基数排序
-void radix_sort(std::vector<int32_t> &v, int32_t d) {
+void radix_sort(std::vector<int32_t> &v, int32_t d = 0) {
   // 快速幂
   auto _quick_pow = [](int64_t v, int64_t p) {
     int64_t result = 1;
@@ -222,6 +222,17 @@ void radix_sort(std::vector<int32_t> &v, int32_t d) {
       --count[_fn(tmp[i], idx)];
     }
   };
+  // 计算 d
+  if (d == 0) {
+    int m = 0;
+    for (auto i : v) {
+      m = std::max<int32_t>(m, i);
+    }
+    while (m) {
+      m /= 10;
+      ++d;
+    }
+  }
 
   for (int32_t i = 0; i < d; ++i) {
     _stable_sort(i);
