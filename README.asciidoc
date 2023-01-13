@@ -75,6 +75,7 @@ docker-compose up
 
 ==== math
 * [x] 排列组合数快速计算: stem:[C^m_n]
+* [x] 快速幂计算
 
 ==== sort
 * [x] 七种排序
