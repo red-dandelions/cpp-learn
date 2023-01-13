@@ -171,78 +171,65 @@ void quick_sort(std::vector<T> &arr, int32_t start, int32_t end) {
 }
 
 // 桶排序
-namespace bucket {
-const int32_t N = 100010;
-int32_t n, w, a[N];
-std::vector<int32_t> bucket[N];
-
-void bucket_sort() {
-  int32_t bucket_size = w / n + 1;
-  for (int32_t i = 0; i < n; ++i) {
-    bucket[i].clear();
+//
+// 适用于数据分布比较均匀的情况
+void bucket_sort(std::vector<int32_t> &v, int32_t bucket_size = INT32_MAX) {
+  std::vector<std::vector<int32_t>> bucket(bucket_size);
+  for (auto i : v) {
+    bucket[i % bucket_size].push_back(i);
   }
-  for (int32_t i = 1; i <= n; ++i) {
-    bucket[a[i] / bucket_size].push_back(a[i]);
-  }
-  int32_t p = 0;
-  for (int32_t i = 0; i < n; ++i) {
+  int32_t idx = 0;
+  for (int i = 0; i < bucket.size(); ++i) {
     insert_sort(bucket[i]);
-    for (int32_t j = 0; j < bucket[i].size(); ++j) {
-      a[++p] = bucket[i][j];
+    for (auto value : bucket[i]) {
+      v[idx++] = value;
     }
   }
 }
-}  // namespace bucket
 
 // 基数排序
-namespace radix {
-const int32_t N = 100010;
-const int32_t W = 100010;
-const int32_t K = 100;
-int32_t n, w[K], k, cnt[W];
-struct Element {
-  int32_t key[K];
-  bool operator<(const Element &y) const {
-    // 两个元素的比较流程
-    for (int32_t i = 1; i <= k; ++i) {
-      if (key[i] == y.key[i]) continue;
-      return key[i] < y.key[i];
+void radix_sort(std::vector<int32_t> &v, int32_t d) {
+  // 取得位数上的值
+  auto _fn = [](int32_t value, int32_t i) -> int32_t {
+    int32_t val = i == 0 ? 1 : i * 10;
+    return (value / val) % 10;
+  };
+
+  // 借助计数排序完成对关键字的排序
+  auto _stable_sort = [&v, &_fn](int32_t idx) {
+    auto tmp = v;
+    std::vector<int32_t> count(11, 0);
+    for (int32_t i = 0; i < v.size(); ++i) {
+      count[_fn(v[i], idx)]++;
     }
-    return false;
-  }
-} a[N], b[N];
+    for (int32_t i = 1; i < 11; i++) {
+      count[i] += count[i - 1];
+    }
+    for (int32_t i = v.size() - 1; i >= 0; --i) {
+      v[count[_fn(tmp[i], idx)] - 1] = tmp[i];
+      --count[_fn(tmp[i], idx)];
+    }
+  };
 
-void counting_sort(int32_t p) {
-  memset(cnt, 0, sizeof(cnt));
-  for (int32_t i = 1; i <= n; ++i) ++cnt[a[i].key[p]];
-  for (int32_t i = 1; i <= w[p]; ++i) cnt[i] += cnt[i - 1];
-  // 为保证排序的稳定性，此处循环i应从n到1
-  // 即当两元素关键字的值相同时，原先排在后面的元素在排序后仍应排在后面
-  for (int32_t i = n; i >= 1; --i) b[cnt[a[i].key[p]]--] = a[i];
-  memcpy(a, b, sizeof(a));
-}
-
-void radix_sort() {
-  for (int32_t i = k; i >= 1; --i) {
-    // 借助计数排序完成对关键字的排序
-    counting_sort(i);
+  for (int32_t i = 0; i < d; ++i) {
+    _stable_sort(i);
   }
 }
-}  // namespace radix
 
 // 计数排序
-namespace count {
-const int32_t N = 100010;
-const int32_t W = 100010;
-
-int32_t n, w, a[N], cnt[W], b[N];
-
-void counting_sort() {
-  memset(cnt, 0, sizeof(cnt));
-  for (int32_t i = 1; i <= n; ++i) ++cnt[a[i]];
-  for (int32_t i = 1; i <= w; ++i) cnt[i] += cnt[i - 1];
-  for (int32_t i = n; i >= 1; --i) b[cnt[a[i]]--] = a[i];
+void counting_sort(std::vector<int32_t> &v, int64_t max_value) {
+  std::vector<int32_t> tmp = v;
+  std::vector<int32_t> count(max_value + 1, 0);
+  for (int64_t i = 0; i < v.size(); ++i) {
+    count[v[i]]++;
+  }
+  for (int i = 1; i < count.size(); ++i) {
+    count[i] += count[i - 1];
+  }
+  for (int i = v.size() - 1; i >= 0; --i) {
+    v[count[tmp[i]] - 1] = tmp[i];
+    --count[tmp[i]];
+  }
 }
-}  // namespace count
 
 }  // namespace sort

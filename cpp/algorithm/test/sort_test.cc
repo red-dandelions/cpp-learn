@@ -89,13 +89,31 @@ TEST(SortTest, QuickSort) {
 }
 
 TEST(SortTest, BucketSort) {
-  // TODO
+  std::vector<int32_t> arr = generate_v();
+
+  sort::bucket_sort(arr, arr.size() + 1);
+
+  for (int32_t i = 0; i < arr.size(); ++i) {
+    ASSERT_EQ(v[i], arr[i]);
+  }
 }
 
 TEST(SortTest, RadixSort) {
-  // TODO
+  std::vector<int32_t> arr = generate_v();
+
+  sort::radix_sort(arr, 2);
+
+  for (int32_t i = 0; i < arr.size(); ++i) {
+    ASSERT_EQ(v[i], arr[i]);
+  }
 }
 
 TEST(SortTest, CountSort) {
-  // TODO
+  std::vector<int32_t> arr = generate_v();
+
+  sort::counting_sort(arr, 15);
+
+  for (int32_t i = 0; i < arr.size(); ++i) {
+    ASSERT_EQ(v[i], arr[i]);
+  }
 }

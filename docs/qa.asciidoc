@@ -42,6 +42,19 @@ Question 4::
 
 ---
 Question 5::
+  cpp 中的算术右移和逻辑右移是根据符号类型的，有符号类型进行算术右移，无符号类型进行逻辑右移，根据需要进行类型转换就能满足。
+
+---
+Question 6::
+  vscode 单击文件会覆盖当前文件。
+  vscode 关闭预览 workbench->editor: Enable Preview 设置为 false
+
+---
+Question 7::
+  zk 创建节点时返回码为 ZNOCHILDRENFOREPHEMERALS. 原因是临时节点不能作为父节点
+
+---
+Question 8::
   continue...
 
 ---
