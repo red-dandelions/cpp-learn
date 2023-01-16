@@ -55,6 +55,10 @@ Question 7::
 
 ---
 Question 8::
+  thread的方法传递引用的时候，必须外层用ref来进行引用传递，否则就是浅拷贝。
+
+---
+Question 9::
   continue...
 
 ---
