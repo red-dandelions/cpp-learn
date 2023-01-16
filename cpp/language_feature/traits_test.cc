@@ -7,6 +7,7 @@
 
 #include <cstdlib>
 #include <functional>
+#include <future>
 #include <initializer_list>
 #include <iostream>
 #include <string>
@@ -78,6 +79,30 @@ void lambda() {
   std::cout << "fib(7): " << fib(7) << std::endl;
 }
 
+void promese_future() {
+  auto func1 = [](std::promise<int32_t>& p) {
+    std::cout << "wait future\n";
+    auto tp1 = std::chrono::steady_clock::now();
+    auto f = p.get_future();
+    auto v = f.get();
+    auto tp2 = std::chrono::steady_clock::now();
+
+    std::cout << "f: " << v << " wait "
+              << std::chrono::duration_cast<std::chrono::seconds>(tp2 - tp1).count() << " s"
+              << std::endl;
+  };
+  auto func2 = [](std::promise<int32_t>& p) {
+    std::cout << "set promise\n";
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+    p.set_value(10);
+  };
+  std::promise<int32_t> p;
+  std::thread t1(func1, std::ref(p));
+  std::thread t2(func2, std::ref(p));
+  t1.join();
+  t2.join();
+}
+
 int main() {
   function(1, 1);
   function<std::string, int>("test", 2);
@@ -98,6 +123,8 @@ int main() {
   std::cout << "乾: " << int64_t(a) << std::endl;
 
   lambda();
+
+  promese_future();
 
   return 0;
 }

@@ -40,7 +40,7 @@ docker-compose up
 * [x] 条件变量使用
 * [x] 模板使用
 * [x] 线程使用
-* [ ] promese future 使用
+* [x] promese future 使用
 * [x] 语法: lambda 函数、initializer_list 使用、typeinfo 使用、空指针调用类成员函数、placement_new 使用、模板可变参数和完美转发、enum class 使用
 
 ---
@@ -80,6 +80,9 @@ docker-compose up
 ==== sort
 * [x] 七种排序
 * [x] 计数、基数、桶排序
+
+==== graph
+* [x] floyd 算法
 
 ---
 === 一些有用功能的实现
