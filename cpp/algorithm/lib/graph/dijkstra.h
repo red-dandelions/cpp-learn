@@ -18,7 +18,8 @@ namespace graph {
 
 class Dijkstra {
  public:
-  explicit Dijkstra(Graph g) : answer(g.graph.size(), int64_t(INT32_MAX)), visit_(g.graph.size()), graph_(g.graph) {}
+  explicit Dijkstra(Graph g)
+      : answer(g.graph.size(), int64_t(INT32_MAX)), visit_(g.graph.size()), graph_(g.graph) {}
 
   void reset() {
     for (int32_t i = 0; i < answer.size(); ++i) {
@@ -78,13 +79,11 @@ class Dijkstra {
   std::vector<int64_t> visit_;
   std::vector<std::vector<std::pair<int32_t, int32_t>>> graph_;
 
-private:
+ private:
   struct Node {
     int32_t node;
     int64_t weight;
-    bool operator>(const Node& n) const {
-      return weight > n.weight;
-    }
+    bool operator>(const Node& n) const { return weight > n.weight; }
   };
 };
 
