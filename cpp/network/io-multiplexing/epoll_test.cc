@@ -71,12 +71,12 @@ void Epoll(std::string_view ip, std::string_view port) {
 
   CHECK(bind(socket_fd, (const struct sockaddr*)&server, sizeof(server)) != -1) << "bind error!";
 
-  CHECK(listen(socket_fd, 5));
+  listen(socket_fd, 5);
 
   epoll_event events[1024];
   int epoll_fd = epoll_create(1);  // 这个参数没有意义
 
-  add_fd(epoll_fd, socket_fd);
+  add_fd(epoll_fd, socket_fd, false);
 
   while (true) {
     // 阻塞直到有事件发生
@@ -92,4 +92,9 @@ void Epoll(std::string_view ip, std::string_view port) {
   close(epoll_fd);
 }
 
-int main() { return 0; }
+int main() {
+  std::string ip = "127.0.0.1";
+  std::string port = "9999";
+  Epoll(ip, port);
+  return 0;
+}

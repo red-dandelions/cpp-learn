@@ -44,12 +44,12 @@ int main(int argc, char* argv[]) {
   std::unique_ptr<reactor::Reactor> reactor = std::make_unique<reactor::Reactor>();
 
   //
-  std::shared_ptr<reactor::EventHandler> event_handle = std::make_shared<reactor::EventHandler>(fd);
+  std::shared_ptr<reactor::Handler> handler = std::make_shared<reactor::Handler>(fd, EventType::kAccept);
   // 注册 accept 事件
-  reactor->RegisterEventHandler(event_handle, Event::kEventAccept);
+  reactor->RegisterEventHandler(handler);
 
   // 运行
-  reactor->Dispatch();
+  reactor->Run();
 
   close(fd);
 

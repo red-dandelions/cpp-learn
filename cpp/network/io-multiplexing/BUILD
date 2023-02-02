@@ -15,7 +15,10 @@ cc_binary(
 )
 
 # mac os 不支持
-#cc_binary(
-#  name = "epoll_test",
-#  srcs = ["epoll_test.cc"],
-#)
+cc_binary(
+  name = "epoll_test",
+  srcs = ["epoll_test.cc"],
+  deps = [
+    "@com_github_google_glog//:glog",
+  ],
+)
