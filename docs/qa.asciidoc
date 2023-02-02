@@ -1,15 +1,64 @@
 = 问题记录
 
 ---
-
 Question 1::
   多进程中变量不共享问题。比如有一个 Foo 类，主进程 fork 一个子进程，在子进程中调用了 Foo 类的 a 函数成员，函数 a 对变量成员 b 修改，但是在主进程中 Foo 类的 b 成员并没有改变。
 
 ---
 
 ---
-
 Question 2::
+  vscode 中代码补全还是报红，可能为BUILD中没有 target，增加 target 之后再使用代码补全。
+
+---
+
+---
+Question 3::
+  配置.ssh/config文件，免密登陆服务器(vscode 中 ssh config也是一样配置)
+```bash
+    # 每隔600秒发送一个no-op包，保持连接
+    Host *
+        ServerAliveInterval 600
+    Host {跳转机器}
+      HostName {ip}
+      User {user}
+      Port {port}
+      PreferredAuthentications publickey,password,keyboard-interactive
+      IdentityFile {ssh密钥：比如: ~/.ssh/id_rsa}
+
+    Host {目标机器}
+      HostName {ip}
+      User {user}
+      Port {port}
+      PreferredAuthentications publickey,password,keyboard-interactive
+      IdentityFile {ssh密钥：比如: ~/.ssh/id_rsa}
+      ProxyCommand ssh {跳转机器} -q -W %h:%p
+```
+
+---
+Question 4::
+  使用 bazel 构建程序，用 lldb 进行 debug 都是机器码.
+  使用 `bazel build -c dbg --spawn_strategy=local` 或者在 `.bazelrc` 文件中加上 `build --spawn_strategy=local` 和 `bazel -c dbg`
+
+---
+Question 5::
+  cpp 中的算术右移和逻辑右移是根据符号类型的，有符号类型进行算术右移，无符号类型进行逻辑右移，根据需要进行类型转换就能满足。
+
+---
+Question 6::
+  vscode 单击文件会覆盖当前文件。
+  vscode 关闭预览 workbench->editor: Enable Preview 设置为 false
+
+---
+Question 7::
+  zk 创建节点时返回码为 ZNOCHILDRENFOREPHEMERALS. 原因是临时节点不能作为父节点
+
+---
+Question 8::
+  thread的方法传递引用的时候，必须外层用ref来进行引用传递，否则就是浅拷贝。
+
+---
+Question 9::
   continue...
 
 ---

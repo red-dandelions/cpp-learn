@@ -21,25 +21,16 @@ docker-compose exec develop bash
 docker-compose up
 ```
 
-== 代码补全
+== autotool 工具使用
 ```bash
-# 生成 compile_commands.json 文件
-bazel run @hedron_compile_commands//:refresh_all
+# 查看使用
+./autotool -h
 
-# 或者执行脚本
-./gen_compile_commands.sh
-```
+# 代码补全
+./autotool -c
 
-== 格式化代码
-```bash
-# 格式化所有源文件
-bash format.sh
-
-# 格式化制定目录下所有源文件
-./format.sh {dirname}
-
-# 格式化单个文件
-clang-format -style=file -i {filename}
+# 格式化代码
+./autotool -f
 ```
 
 ---
@@ -49,31 +40,52 @@ clang-format -style=file -i {filename}
 * [x] 条件变量使用
 * [x] 模板使用
 * [x] 线程使用
-* [ ] promese future 使用
+* [x] promese future 使用
 * [x] 语法: lambda 函数、initializer_list 使用、typeinfo 使用、空指针调用类成员函数、placement_new 使用、模板可变参数和完美转发、enum class 使用
 
 ---
 === Data Structure and Algorithm
+==== stack
+* [x] stack 链表实现
+* [x] 单调栈例子
+
+==== queue
+* [ ] ringbuffer
+
 ==== hash
 * [x] murmurhash
 * [x] md5
 * [x] crc32
 * [x] string_roll_hash 滚动哈希
 
-==== queue
-* [ ] ringbuffer
-
 ==== search
 * [x] UFS 并查集
 
 ==== tree
 * [x] BinaryIndexTree 树状数组
-* [ ] SegmentTree 线段树
+* [x] SegmentTree 线段树
 * [x] 大根堆和小根堆
-* [ ] 配对堆
+* [x] 配对堆
+* [x] 字典树
+* [x] 红黑树
+* [ ] huffman tree
+
+==== table
+* [x] sparse table表: 用于多次查询区间最值
 
 ==== math
 * [x] 排列组合数快速计算: stem:[C^m_n]
+* [x] 快速幂计算
+
+==== sort
+* [x] 七种排序
+* [x] 计数、基数、桶排序
+
+==== graph
+* [x] floyd 算法
+* [x] bellman-ford, spfa 算法
+* [x] dijkstra 算法
+* [x] 拓扑排序
 
 ---
 === 一些有用功能的实现
@@ -88,6 +100,7 @@ clang-format -style=file -i {filename}
 * [x] 单例模式模板基类
 * [x] 阻塞队列
 * [x] 调用指定动态库里的函数
+* [ ] 定时器: 等待一段时间后执行指定代码
 
 ---
 === 设计模式

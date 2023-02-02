@@ -1,6 +1,8 @@
 #include "glog/logging.h"
 
 #include <arpa/inet.h>
+#include <cstdio>
+#include <limits.h>
 #include <poll.h>
 #include <string_view>
 #include <unistd.h>
@@ -22,10 +24,10 @@ void Poll(std::string_view ip, std::string_view port) {
 
   CHECK(listen(socket_fd, 5));
 
-  pollfd clients[OPEN_MAX];
+  pollfd clients[FOPEN_MAX];
   clients[0].fd = socket_fd;
   clients[0].events = POLLRDNORM;
-  for (size_t i = 1; i < OPEN_MAX; ++i) {
+  for (size_t i = 1; i < FOPEN_MAX; ++i) {
     clients[i].fd = -1;
   }
   int maxi = 0;  // clients 正在使用的最大下标
@@ -40,13 +42,13 @@ void Poll(std::string_view ip, std::string_view port) {
       int conn_fd = accept(socket_fd, (struct sockaddr *)&client, &len);
 
       int i;
-      for (i = 1; i < OPEN_MAX; ++i) {
+      for (i = 1; i < FOPEN_MAX; ++i) {
         if (clients[i].fd < 0) {
           clients[i].fd = conn_fd;
           break;
         }
       }
-      CHECK(i < OPEN_MAX) << "too many client";
+      CHECK(i < FOPEN_MAX) << "too many client";
 
       clients[i].events = POLLRDNORM;
       maxi = socket_fd > maxi ? socket_fd : maxi;

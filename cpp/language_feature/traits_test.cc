@@ -7,6 +7,7 @@
 
 #include <cstdlib>
 #include <functional>
+#include <future>
 #include <initializer_list>
 #include <iostream>
 #include <string>
@@ -54,6 +55,7 @@ void init_test(std::initializer_list<int> args) {
   std::cout << std::endl;
 }
 
+#ifdef __APPLE__
 enum class 八卦 : int64_t {
   坎,  // 北
   坤,  // 西南
@@ -65,6 +67,7 @@ enum class 八卦 : int64_t {
   艮,  // 东北
   离   // 南
 };
+#endif
 
 void lambda() {
   std::function<int(int)> fib;
@@ -76,6 +79,30 @@ void lambda() {
     return fib(n - 1) + fib(n - 2);
   };
   std::cout << "fib(7): " << fib(7) << std::endl;
+}
+
+void promese_future() {
+  auto func1 = [](std::promise<int32_t>& p) {
+    std::cout << "wait future\n";
+    auto tp1 = std::chrono::steady_clock::now();
+    auto f = p.get_future();
+    auto v = f.get();
+    auto tp2 = std::chrono::steady_clock::now();
+
+    std::cout << "f: " << v << " wait "
+              << std::chrono::duration_cast<std::chrono::seconds>(tp2 - tp1).count() << " s"
+              << std::endl;
+  };
+  auto func2 = [](std::promise<int32_t>& p) {
+    std::cout << "set promise\n";
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+    p.set_value(10);
+  };
+  std::promise<int32_t> p;
+  std::thread t1(func1, std::ref(p));
+  std::thread t2(func2, std::ref(p));
+  t1.join();
+  t2.join();
 }
 
 int main() {
@@ -94,10 +121,14 @@ int main() {
 
   init_test({9, 8, 7, 1, 2, 3});
 
+#ifdef __APPLE__
   八卦 a = 八卦::乾;
   std::cout << "乾: " << int64_t(a) << std::endl;
+#endif
 
   lambda();
+
+  promese_future();
 
   return 0;
 }

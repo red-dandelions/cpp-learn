@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cinttypes>
 #include <numeric>
 #include <vector>
 
