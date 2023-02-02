@@ -22,3 +22,8 @@ static bool switch_to_user(uid_t user_id, gid_t gp_id) {
 
   return true;
 }
+
+int main() {
+  switch_to_user(0, 0);
+  return 0;
+}

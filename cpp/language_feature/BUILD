@@ -11,6 +11,7 @@ cc_binary(
 cc_binary(
   name = "condition_variable_test",
   srcs = ["condition_variable_test.cc"],
+  linkopts = ["-lpthread"],
 )
 
 cc_binary(
@@ -21,9 +22,13 @@ cc_binary(
 cc_binary(
   name = "thread_test",
   srcs = ["thread_test.cc"],
+  linkopts = [
+    "-lpthread",
+  ]
 )
 
 cc_binary(
   name = "traits_test",
   srcs = ["traits_test.cc"],
+  linkopts = ["-lpthread"],
 )

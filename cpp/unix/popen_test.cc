@@ -5,6 +5,7 @@
  * int pclose(FILE* stream);
  */
 
+#include <cstring>
 #include <stdio.h>
 #include <string>
 

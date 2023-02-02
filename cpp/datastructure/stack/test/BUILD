@@ -1,6 +1,7 @@
 cc_test(
   name = "monotonic_stack_test",
   srcs = ["monotonic_stack_test.cc"],
+  copts = ["-pthread"],
   deps = [
     "@com_google_googletest//:gtest_main",
   ],

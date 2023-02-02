@@ -55,6 +55,7 @@ void init_test(std::initializer_list<int> args) {
   std::cout << std::endl;
 }
 
+#ifdef __APPLE__
 enum class 八卦 : int64_t {
   坎,  // 北
   坤,  // 西南
@@ -66,6 +67,7 @@ enum class 八卦 : int64_t {
   艮,  // 东北
   离   // 南
 };
+#endif
 
 void lambda() {
   std::function<int(int)> fib;
@@ -119,8 +121,10 @@ int main() {
 
   init_test({9, 8, 7, 1, 2, 3});
 
+#ifdef __APPLE__
   八卦 a = 八卦::乾;
   std::cout << "乾: " << int64_t(a) << std::endl;
+#endif
 
   lambda();
 

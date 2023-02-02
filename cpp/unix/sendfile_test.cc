@@ -8,12 +8,13 @@
  * error 返回 -1
  */
 #include <arpa/inet.h>
+#include <cstring>
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
-// #include <sys/sendfile.h> // linux 系统
+#include <sys/sendfile.h>  // linux 系统
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -46,12 +47,15 @@ int main() {
   socklen_t client_addr_len = sizeof(client);
   int connfd = accept(sockfd, (struct sockaddr *)&client, &client_addr_len);
 
-  // linux
-  // sendfile(connfd, filefd, nullptr, stat_buf.st_size);
-
   // mac os
+#ifdef __APPLE__
   auto size = stat_buf.st_size;
   sendfile(filefd, sockfd, 0, &size, nullptr, 0);
+#else
+  // linux
+  sendfile(connfd, filefd, nullptr, stat_buf.st_size);
+#endif
+
   close(connfd);
   close(sockfd);
   close(filefd);

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cinttypes>
+#include <cstdlib>
 #include <vector>
 
 namespace sort {

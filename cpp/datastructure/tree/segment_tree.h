@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cinttypes>
+#include <functional>
 #include <vector>
 
 namespace tree {

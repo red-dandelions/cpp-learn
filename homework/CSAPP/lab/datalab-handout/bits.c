@@ -141,16 +141,14 @@ NOTES:
  *   Max ops: 14
  *   Rating: 1
  */
-int bitXor(int x, int y) {
-  return ~(~(x & ~y) & ~(~x & y));
-}
+int bitXor(int x, int y) { return ~(~(x & ~y) & ~(~x & y)); }
 /*
  * tmin - return minimum two's complement integer
  *   Legal ops: ! ~ & ^ | + << >>
  *   Max ops: 4
  *   Rating: 1
  */
-int tmin(void) { return 2; }
+int tmin(void) { return (0x80 << 24); }
 // 2
 /*
  * isTmax - returns 1 if x is the maximum, two's complement number,
@@ -159,7 +157,7 @@ int tmin(void) { return 2; }
  *   Max ops: 10
  *   Rating: 1
  */
-int isTmax(int x) { return 2; }
+int isTmax(int x) { return (!!((x + 1) ^ 0)) & (!((x + 1) ^ (~x))); }
 /*
  * allOddBits - return 1 if all odd-numbered bits in word set to 1
  *   where bits are numbered from 0 (least significant) to 31 (most significant)
@@ -168,7 +166,10 @@ int isTmax(int x) { return 2; }
  *   Max ops: 12
  *   Rating: 2
  */
-int allOddBits(int x) { return 2; }
+int allOddBits(int x) {
+  int val = (0xaa << 24) | (0xaa << 16) | (0xaa << 8) | (0xaa);  // 0xaaaaaaaa
+  return !((x & val) ^ val);
+}
 /*
  * negate - return -x
  *   Example: negate(1) = -1.
@@ -187,7 +188,13 @@ int negate(int x) { return ~x + 1; }
  *   Max ops: 15
  *   Rating: 3
  */
-int isAsciiDigit(int x) { return 2; }
+int isAsciiDigit(int x) {
+  // x > 0 : !((x >> 31) & 1)                         ops: 3
+  // 0x2f - x < 0: (((0x2f + (~x + 1)) >> 31) & 1)    ops: 5
+  // x - 0x3a < 0: (((x + (~0x3a + 1)) >> 31) & 1)    ops: 5
+  return !((x >> 31) & 1) & (((0x2f + (~x + 1)) >> 31) & 1) &
+         (((x + (~0x3a + 1)) >> 31) & 1);  // ops: 15
+}
 /*
  * conditional - same as x ? y : z
  *   Example: conditional(2,4,5) = 4
@@ -195,7 +202,10 @@ int isAsciiDigit(int x) { return 2; }
  *   Max ops: 16
  *   Rating: 3
  */
-int conditional(int x, int y, int z) { return 2; }
+int conditional(int x, int y, int z) {
+  int v = ~!!x + 1;
+  return (v & y) | (~v & z);
+}
 /*
  * isLessOrEqual - if x <= y  then return 1, else return 0
  *   Example: isLessOrEqual(4,5) = 1.
@@ -203,7 +213,32 @@ int conditional(int x, int y, int z) { return 2; }
  *   Max ops: 24
  *   Rating: 3
  */
-int isLessOrEqual(int x, int y) { return 2; }
+int isLessOrEqual(int x, int y) {
+  // x - 1 - y < 0
+  // 1.:  x < 0 && 0 < y  res: 1
+  // 2.:  x < 0 && y < 0
+  // 3.:  0 < x && 0 < y
+  // 4.:  0 < x && y < 0  res: 0
+
+  // 异号 ops: 7
+  // 如果 x > 0 && y < 0; a = 0 else a = 1
+  int a = !(((~x >> 31) & 1) & ((y >> 31) & 1));
+
+  // ops: 6
+  // 如果 x < 0 && 0 < y; b = 1 else b = 0
+  // 与上面情况互斥
+  int b = ((x >> 31) & 1) & ((~y >> 31) & 1);
+
+  // 同号: ops: 7
+  // val = x - y
+  // val <= 0
+  int val = x + ~y + 1;
+  int c = ((val >> 31) & 1) | !val;
+
+  // ops: 2
+  // total ops: 22
+  return a & (b | c);
+}
 // 4
 /*
  * logicalNeg - implement the ! operator, using all of
@@ -213,7 +248,10 @@ int isLessOrEqual(int x, int y) { return 2; }
  *   Max ops: 12
  *   Rating: 4
  */
-int logicalNeg(int x) { return 2; }
+int logicalNeg(int x) {
+  unsigned int t = ~(((~x + 1) >> 31) << 31 | x) >> 31 << 31;
+  return t >> 31;
+}
 /* howManyBits - return the minimum number of bits required to represent x in
  *             two's complement
  *  Examples: howManyBits(12) = 5
@@ -226,7 +264,10 @@ int logicalNeg(int x) { return 2; }
  *  Max ops: 90
  *  Rating: 4
  */
-int howManyBits(int x) { return 0; }
+int howManyBits(int x) {
+  // 32 - __builtin_clz(x);
+  return 2;
+}
 // float
 /*
  * floatScale2 - Return bit-level equivalent of expression 2*f for
