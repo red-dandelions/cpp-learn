@@ -1,5 +1,6 @@
 build --cxxopt=-std=c++17
 build --cxxopt=-D_GLIBCXX_USE_CXX11_ABI=1
+build --cxxopt=-DNDEBUG
 build --cxxopt="-fPIC"
 build -c dbg
 build --spawn_strategy=local

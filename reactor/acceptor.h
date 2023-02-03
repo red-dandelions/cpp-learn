@@ -1,15 +1,21 @@
 #pragma once
 
 #include <cinttypes>
+#include <string>
 
 namespace reactor {
+
+struct AcceptorResult {
+  int32_t fd;
+  std::string address;
+};
 
 class Acceptor {
  public:
   Acceptor() {}
   ~Acceptor() {}
 
-  int32_t Accept(int32_t fd);
+  AcceptorResult Accept(int32_t fd);
 };
 
 }  // namespace reactor

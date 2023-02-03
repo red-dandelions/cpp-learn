@@ -1,7 +1,8 @@
 #pragma once
 
-#include "handler.h"
 #include "acceptor.h"
+#include "handler.h"
+#include "network_utils.h"
 
 #include <cinttypes>
 #include <memory>
@@ -15,7 +16,7 @@ class EventDemultiplex {
 
   virtual int32_t RegisterEventHandler(std::shared_ptr<Handler> handler) = 0;
 
-  virtual void ClearEventHandler(std::shared_ptr<Handler> handler) = 0;
+  virtual int32_t ClearEventHandler(std::shared_ptr<Handler> handler) = 0;
 
   virtual void WaitForEvents(int32_t timeout = -1) = 0;
 };
@@ -31,7 +32,7 @@ class EpollEventDemultiplex : public EventDemultiplex {
 
   int32_t RegisterEventHandler(std::shared_ptr<Handler> handler) override;
 
-  void ClearEventHandler(std::shared_ptr<Handler> handler) override;
+  int32_t ClearEventHandler(std::shared_ptr<Handler> handler) override;
 
   void WaitForEvents(int32_t timeout = -1) override;
 
@@ -45,8 +46,8 @@ class EpollEventDemultiplex : public EventDemultiplex {
   // 处理 accept 请求;
   std::unique_ptr<Acceptor> acceptor_;
 
-
-  const int32_t MAX_EPOLL_EVENT = 1024;
+  // epoll 注册事件数
+  int32_t epoll_event_count_;
 
   // 文件描述符 fd 到 Handler 的映射
   std::unordered_map<int32_t, std::shared_ptr<Handler>> fd_to_handler_;

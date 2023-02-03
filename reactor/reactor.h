@@ -8,8 +8,7 @@ namespace reactor {
 class Reactor {
  public:
   Reactor() : event_demultiplex_(new EpollEventDemultiplex()) {}
-  Reactor(EventDemultiplex* event_demultiplex)
-      : event_demultiplex_(event_demultiplex) {}
+  Reactor(EventDemultiplex* event_demultiplex) : event_demultiplex_(event_demultiplex) {}
   ~Reactor(){};
 
   // 注册事件

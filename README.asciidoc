@@ -114,7 +114,7 @@ docker-compose up
 * [ ] 时间轮的实现
 * [ ] 时间堆的实现
 * [x] signal使用例子
-* [ ] reactor, proactor模式实现
+* [x] reactor 模式实现
 
 ---
 === unix api 使用例子

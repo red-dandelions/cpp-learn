@@ -17,6 +17,8 @@ cc_library(
     "reactor.cc",
     "event_demultiplex.cc",
     "handler.cc",
+    "processor.cc",
+    "thread_pool.cc",
   ],
   hdrs = [
     "acceptor.h",
@@ -24,8 +26,11 @@ cc_library(
     "reactor.h",
     "event_demultiplex.h",
     "handler.h",
+    "processor.h",
+    "thread_pool.h",
   ],
   deps = [
     "@com_github_google_glog//:glog",
-  ]
+  ],
+  linkopts = ["-lpthread"],
 )

@@ -23,6 +23,12 @@ void client(std::string_view ip, int32_t port) {
 
   CHECK(send(fd, buf, strlen(buf), 0) == strlen(buf))
       << "send: " << strlen(buf) << " bytes. error: " << std::strerror(errno);
+  sleep(1);
+  CHECK(send(fd, buf, strlen(buf), 0) == strlen(buf))
+      << "send: " << strlen(buf) << " bytes. error: " << std::strerror(errno);
+
+  sleep(1);
+  read(fd, buf, strlen(buf));
 }
 
 int main() {

@@ -1,9 +1,6 @@
-#include "event_demultiplex.h"
-#include "network_utils.h"
 #include "reactor.h"
 
 #include <arpa/inet.h>
-#include <cstdlib>
 #include <glog/logging.h>
 
 #define HOST_IP "127.0.0.1"
@@ -20,7 +17,7 @@ int main(int argc, char* argv[]) {
 
   // 创建套接字
   int32_t fd = socket(PF_INET, SOCK_STREAM, 0);
-  CHECK(fd != -1) << "socker error: " << std::strerror(errno);
+  CHECK(fd != -1) << "socket() failed, error: " << std::strerror(errno);
 
   // 设置 fd 为非阻塞
   reactor::SetNonblock(fd);
@@ -43,15 +40,14 @@ int main(int argc, char* argv[]) {
 
   std::unique_ptr<reactor::Reactor> reactor = std::make_unique<reactor::Reactor>();
 
-  //
-  std::shared_ptr<reactor::Handler> handler = std::make_shared<reactor::Handler>(fd, EventType::kAccept);
   // 注册 accept 事件
+  std::shared_ptr<reactor::Handler> handler =
+      std::make_shared<reactor::Handler>(fd, EventType::kAccept);
+
   reactor->RegisterEventHandler(handler);
 
   // 运行
   reactor->Run();
-
-  close(fd);
 
   return 0;
 }
