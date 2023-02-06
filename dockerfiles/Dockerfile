@@ -5,7 +5,7 @@ ENV TZ=Asia/Shanghai LANG=C.UTF-8
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && \
     # 安装一些依赖
     apt update && \
-    apt install clang-format gdb gcc g++ git vim inetutils-ping unzip zip tcpdump wget python tzdata gcc-multilib nodejs npm -y && \
+    apt install clang-format gdb gcc g++ git vim inetutils-ping unzip zip tcpdump wget python tzdata gcc-multilib nodejs npm net-tools -y && \
     # 安装 bazel，版本为 5.3.2
     wget https://github.com/bazelbuild/bazel/releases/download/5.3.2/bazel-5.3.2-installer-linux-x86_64.sh -O bazel-install.sh && \
     bash bazel-install.sh && \
@@ -31,4 +31,6 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone &
 RUN apt install software-properties-common -y && \
     add-apt-repository ppa:deadsnakes/ppa && \
     apt install python3.7 python3.7-dev -y && rm /usr/bin/python3 && ln -sf /usr/bin/python3.7 /usr/bin/python3 && \
-    apt install python3-pip -y
+    apt install python3-pip -y \
+    # 安装 redis, kafka 和 mysql 的 python 库
+    pip3 install redis pymysql kafka-python

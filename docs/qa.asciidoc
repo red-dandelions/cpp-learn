@@ -59,6 +59,9 @@ Question 8::
 
 ---
 Question 9::
+  docker-compose 的 depends_on 编排容器，然后可以直接通过 容器名称访问另一个容器的ip
+
+Question 10::
   continue...
 
 ---

@@ -1,6 +1,7 @@
 ---
 version: '3.9'
 services:
+  # 构建镜像
   develop-image:
     image: dandelion000/ubuntu:develop
     build: 
@@ -10,6 +11,7 @@ services:
         - "MAINTAINER=dandelion000"
       network: test
 
+  # 开发环境
   develop:
     image: dandelion000/ubuntu:develop
     volumes:
@@ -17,7 +19,52 @@ services:
     command: [ "/usr/bin/tail", "-f", "/dev/null" ]
     working_dir: /root/cpp_learn
     privileged: true
-    network_mode: host
+    # network_mode: host
+    networks:
+      - test
+    depends_on:
+      - "redis"
+      - "mysql"
+      - "kafka"
+
+  # mysql 数据库
+  mysql:
+    image: mysql
+    volumes:
+      - "~/mysql_test:/var/lib/mysql"
+      # 配置
+      #- "~/mysql_test/conf:/etc/mysql/conf.d"
+    environment:
+      MYSQL_ROOT_PASSWORD: root # root管理员用户密码
+    networks:
+      - test
+
+  # redis 数据库
+  redis:
+    image: redis
+    #volumes:
+    #  - "～/redis/data:/data" # dump.rdb 存放在 /data 目录下
+    #  - "~/redis/redis.conf:/etc/redis.conf" # 将 redis 配置映射过去
+    # command: ["redis-server", "/etc/redis.conf"] # 使用映射过去的配置文件
+    command: ["redis-server"] # 无配置文件启动 redis
+    networks:
+      - test
+
+  zk:
+    image: wurstmeister/zookeeper
+    networks:
+      - test
+
+  kafka:
+    image: wurstmeister/kafka
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zk:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://:9092
+      KAFKA_LISTENERS: PLAINTEXT://:9092
+    networks:
+      - test
+    depends_on:
+      - "zk"
 
 networks:
   test: {}
