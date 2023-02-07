@@ -1,3 +1,4 @@
+#coding=UTF-8
 import unittest
 import redis
 import time
@@ -292,31 +293,153 @@ class TestRedis(unittest.TestCase):
 
   # redis 集合
   def test_set(self):
-    pass
+    redis_conn = redis.Redis(host='redis', port=6379, db=0)
+
+    if redis_conn.exists('set1'):
+      redis_conn.delete('set1')
+    if redis_conn.exists('set2'):
+      redis_conn.delete('set2')
+
+    #	向集合添加一个或多个成员
+    ret = redis_conn.sadd('set1', 'value1', 'value2', 'value2')
+    self.assertTrue(ret == 2)
+    ret = redis_conn.sadd('set2', 'value1', 'value3', 'value3')
+    self.assertTrue(ret == 2)
+
+    #	获取集合的成员数
+    ret = redis_conn.scard('set1')
+    self.assertTrue(ret == 2)
+
+    #	判断 member 元素是否是集合 key 的成员
+    ret = redis_conn.sismember('set1', 'value2')
+    self.assertTrue(ret)
+
+    #	返回集合中的所有成员
+    ret = redis_conn.smembers('set1')
+    self.assertTrue(b'value1' in ret)
+    self.assertTrue(b'value2' in ret)
+
+    #	返回给定所有集合的差集 (set1 中没有 set2 的元素)
+    ret = redis_conn.sdiff('set1', 'set2')
+    self.assertTrue(b'value2' in ret)
+
+    #	返回给定所有集合的交集
+    ret = redis_conn.sinter('set1', 'set2')
+    self.assertTrue(b'value1' in ret)
+
+    #	返回所有给定集合的并集
+    ret = redis_conn.sunion('set1', 'set2')
+    self.assertTrue(b'value1' in ret)
+    self.assertTrue(b'value2' in ret)
+    self.assertTrue(b'value3' in ret)
+
+    # redis_conn.sdiffstore()   #	返回给定所有集合的差集并存储在 destination 中
+    # redis_conn.sinterstore()  #	返回给定所有集合的交集并存储在 destination 中
+    #	所有给定集合的并集存储在 destination 集合中
+    ret3 = redis_conn.sunionstore('set3', 'set1', 'set2')
+
+    #	将 member 元素从 source 集合移动到 destination 集合
+    ret = redis_conn.smove('set1', 'set2', 'value2')
+    self.assertTrue(ret)
+    #	迭代集合中的元素
+    ret = redis_conn.sscan('set3', 0, 'value*', 2)
+    self.assertTrue(ret[0] == 1)
+    self.assertTrue(ret[1][0] == b'value1')
+    self.assertTrue(ret[1][1] == b'value2')
+    ret = redis_conn.sscan('set3', ret[0], 'value*', 2)
+    self.assertTrue(ret[0] == 0)
+    self.assertTrue(ret[1][0] == b'value3')
+    
+    #	移除并返回集合中的一个随机元素
+    ret = redis_conn.spop('set1')
+    self.assertTrue(ret == b'value1')
+    #	返回集合中一个或多个随机数
+    ret = redis_conn.srandmember('set2', 2)
+    self.assertTrue(len(ret) == 2)
+    #	移除集合中一个或多个成员
+    ret = redis_conn.srem('set3', 'value1', 'value2', 'value3')
+    self.assertTrue(ret == 3)
+
+    redis_conn.close()
 
   # redis 有序集合
   def test_sort_set(self):
     pass
+    '''
+    ZADD	向有序集合添加一个或多个成员，或者更新已存在成员的分数
+    ZCARD	获取有序集合的成员数
+    ZCOUNT	计算在有序集合中指定区间分数的成员数
+    ZINCRBY	有序集合中对指定成员的分数加上增量 increment
+    ZINTERSTORE	计算给定的一个或多个有序集的交集并将结果集存储在新的有序集合 key 中
+    ZLEXCOUNT	在有序集合中计算指定字典区间内成员数量
+    ZRANGE	通过索引区间返回有序集合成指定区间内的成员
+    ZRANGEBYLEX	通过字典区间返回有序集合的成员
+    ZRANGEBYSCORE	通过分数返回有序集合指定区间内的成员
+    ZRANK	返回有序集合中指定成员的索引
+    ZREM	移除有序集合中的一个或多个成员
+    ZREMRANGEBYLEX	移除有序集合中给定的字典区间的所有成员
+    ZREMRANGEBYRANK	移除有序集合中给定的排名区间的所有成员
+    ZREMRANGEBYSCORE	移除有序集合中给定的分数区间的所有成员
+    ZREVRANGE	返回有序集中指定区间内的成员，通过索引，分数从高到底
+    ZREVRANGEBYSCORE	返回有序集中指定分数区间内的成员，分数从高到低排序
+    ZREVRANK	返回有序集合中指定成员的排名，有序集成员按分数值递减(从大到小)排序
+    ZSCORE	返回有序集中，成员的分数值
+    ZUNIONSTORE	计算一个或多个有序集的并集，并存储在新的 key 中
+    ZSCAN	迭代有序集合中的元素（包括元素成员和元素分值）
+    '''
 
   # redis hyperloglog
   def test_hyperloglog(self):
-    pass
+    redis_conn = redis.Redis(host='redis', port=6379, db=0)
 
-  # redis 地理信息
-  def test_geo(self):
-    pass
+    if redis_conn.exists('hyper1'):
+      redis_conn.delete('hyper1')
+    if redis_conn.exists('hyper2'):
+      redis_conn.delete('hyper2')
 
-  # redis stream
-  def test_stream(self):
-    pass
+    #	添加指定元素到 HyperLogLog 中。
+    ret = redis_conn.pfadd('hyper1', 'value1', 'value2', 'value3','value4','value1','value2')
+    self.assertTrue(ret == 1)
+    #	返回给定 HyperLogLog 的基数估算值。
+    ret = redis_conn.pfcount('hyper1')
+    self.assertTrue(ret == 4)
+    #	将多个 HyperLogLog 合并为一个 HyperLogLog
+    redis_conn.pfadd('hyper2', 'value5','value6')
+    ret = redis_conn.pfmerge('hyper1', 'hyper2')
+    self.assertTrue(ret)
+    ret = redis_conn.pfcount('hyper1')
+    self.assertTrue(ret == 6)
 
-  # redis pub/sub
-  def test_pub_sub(self):
-    pass
+    redis_conn.close()
 
   # redis pipeline
   def test_pipeline(self):
-    pass
+    conn = redis.Redis(host='redis',port=6379,db=0)
+    conn.set('pipeline', 'value1')
+    # transaction=False 则为流水线
+    with conn.pipeline(transaction=True) as p:
+      p.watch('pipeline')
+      # 开启事物
+      p.multi()
+
+      # 命令入队
+      p.get('pipeline')
+
+      p.set('pipeline', 'value2')
+
+      p.get('pipeline')
+
+      # 执行事务
+      ret = p.execute()
+
+    self.assertTrue(ret[0] == b'value1')
+    self.assertTrue(ret[1])
+    self.assertTrue(ret[2] == b'value2')
+
+    if conn.exists('pipeline'):
+      conn.delete('pipeline')
+
+    conn.close()
 
 def suite():
   return unittest.TestLoader().loadTestsFromTestCase(TestRedis)
