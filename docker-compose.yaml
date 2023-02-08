@@ -50,7 +50,7 @@ services:
     networks:
       - test
 
-  zk:
+  zookeeper:
     image: wurstmeister/zookeeper
     networks:
       - test
@@ -58,13 +58,13 @@ services:
   kafka:
     image: wurstmeister/kafka
     environment:
-      KAFKA_ZOOKEEPER_CONNECT: zk:2181
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://:9092
       KAFKA_LISTENERS: PLAINTEXT://:9092
     networks:
       - test
     depends_on:
-      - "zk"
+      - "zookeeper"
 
 networks:
   test: {}
