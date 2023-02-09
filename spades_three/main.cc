@@ -1,11 +1,7 @@
-#include "poker.h"
-
-#include <iostream>
+#include "client.h"
 
 int main() {
-  using namespace spades_three;
-
-  Poker p;
-
+  spades_three::Client client(0);
+  client.Game();
   return 0;
 }

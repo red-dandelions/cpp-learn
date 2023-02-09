@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package spades_three;
+
+enum Suit {
+  Diamond = 0;
+  Club = 1;
+  Heart = 2;
+  Spade = 3;
+  Joker = 4;
+};
+
+enum Number {
+  Four = 0;
+  Five = 1;
+  Six = 2;
+  Seven = 3;
+  Eight = 4;
+  Nine = 5;
+  Ten = 6;
+  J = 7;
+  Q = 8;
+  K = 9;
+  A = 10;
+  Two = 11;
+  Three = 12;
+  BlackJoker = 13;
+  ColorJoker = 14;
+};
+
+message Card {
+  Suit suit = 1;
+  Number number = 2;
+};
+
+enum Type {
+  None = 0;
+  Single = 1;
+  Pair = 2;
+  TypeThree = 3;
+  Sequence = 4;
+  SameSuit = 5;
+  ThreeWithPair = 6;
+  FourWithOne = 7;
+  TypeFive = 8;
+  SuitSequence = 9;
+  All = 10;
+};
+
+message Cards {
+  Type type = 1;
+  repeated Card cards = 2;
+};
+
+enum Identity {
+  Civilian = 0;
+  SpadesThree = 1;
+  Boss = 2;
+};
+
+enum Position {
+  East = 0;
+  South = 1;
+  West = 2;
+  North = 3;
+};
+
+message Player {
+  Identity identity = 1;
+  Cards cards = 2;
+  Position position = 3;
+  bool first = 4;
+  string id = 5;
+};
